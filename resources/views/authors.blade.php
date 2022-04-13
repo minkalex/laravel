@@ -5,8 +5,8 @@
 @section('content')
     <div class="d-flex justify-content-end">
         <div class="btn-group mb-5" role="group" aria-label="Basic outlined example">
-            <a href="./log_in" class="btn btn-outline-success">Login</a>
-            <a href="./registration" class="btn btn-outline-success">Sign-up</a>
+            <a href="./login" class="btn btn-outline-success">Login</a>
+            <a href="./signup" class="btn btn-outline-success">Sign-up</a>
         </div>
     </div>
     <div class="row" style="flex-wrap: unset; ">
