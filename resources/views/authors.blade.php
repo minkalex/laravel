@@ -20,7 +20,7 @@
                 Authors
             </li>
             @foreach ($objUsers as $objUser)
-                <a href="./users/{{ $objUser->id }}" class="list-group-item list-group-item-action">{{ $objUser->full_name }}</a>
+                <a href="./user/{{ $objUser->id }}" class="list-group-item list-group-item-action">{{ $objUser->full_name }}</a>
             @endforeach
         </div>
         <div class="col-8">

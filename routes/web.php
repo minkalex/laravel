@@ -16,17 +16,15 @@ use App\Http\Controllers\UsersController;
 */
 
 Route::get('/', [PostController::class, 'index'])->name('main');
+Route::get('/user/{user_id}', [PostController::class, 'view']);
 
-Route::get('/users/{id}', [PostController::class, 'view']);
-Route::get('/profile', function () {
-    return view('profile');
-})->name('profile');
+Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
 
-Route::get('/login', [UsersController::class, 'login']);
-Route::post('/validation', [UsersController::class, 'authenticate']);
+Route::get('/login', [UsersController::class, 'showLoginForm']);
+Route::post('/login', [UsersController::class, 'authenticate']);
 
-Route::get('/signup', [UsersController::class, 'create']);
-Route::post('/registration', [UsersController::class, 'store']);
+Route::get('/signup', [UsersController::class, 'showSingUoForm']);
+Route::post('/registration', [UsersController::class, 'registration'])->middleware('pass_match');
 
 Route::fallback(function () {
     return redirect()->route('main');

@@ -28,7 +28,7 @@ class UsersController extends Controller
     /**
      * @return View
      */
-    public function login(): View
+    public function showLoginForm(): View
     {
         return view('login');
     }
@@ -36,7 +36,7 @@ class UsersController extends Controller
     /**
      * @return View
      */
-    public function create(): View
+    public function showSingUoForm(): View
     {
         return view('signup');
     }
@@ -45,13 +45,14 @@ class UsersController extends Controller
      * @param  Request  $request
      * @return RedirectResponse
      */
-    public function store(Request $request): RedirectResponse
+    public function registration(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'last_name' => 'required|max:255',
             'name' => 'required|max:255',
             'email' => 'required|unique:users|max:255|email:rfc,dns',
             'password' => 'required|max:255',
+            'repeat_password' => 'required|max:255',
         ],
         $messages = [
             'required' => 'Поле обязательно для заполнения.',
@@ -66,16 +67,31 @@ class UsersController extends Controller
                 ->withInput();
         }
 
-        User::create($request->all());
-        return redirect('/');
+        User::create([
+            'last_name' => $request->last_name,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+        return redirect('/login');
     }
 
-    public function profile($data = null)
+    /**
+     * @return View|RedirectResponse
+     */
+    public function profile(): View|RedirectResponse
     {
-        return view('profile')
-            ->with('objUser', $data);
+        if (Auth::check()) {
+            return view('profile');
+        } else {
+            return redirect('/login');
+        }
     }
 
+    /**
+     * @param  Request  $request
+     * @return View|RedirectResponse
+     */
     public function authenticate(Request $request): View|RedirectResponse
     {
         $credentials = $request->validate([

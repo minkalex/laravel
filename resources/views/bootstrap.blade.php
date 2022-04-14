@@ -11,7 +11,7 @@
     <title>@yield('title')</title>
 </head>
 <body class="container mt-5">
-<div class="content w-100">
+<div class="content w-100 mb-5">
     @yield('content')
 </div>
 

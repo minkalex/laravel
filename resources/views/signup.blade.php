@@ -1,6 +1,6 @@
 @extends('bootstrap')
 
-@section('title', "Login")
+@section('title', "Sing-up")
 
 @section('content')
     <style>
@@ -31,7 +31,7 @@
             z-index: 2;
         }
 
-        #name, #email {
+        #name, #email, #password {
             border-radius: 0;
             border-bottom: 0;
         }
@@ -42,7 +42,7 @@
             border-bottom-left-radius: 0;
         }
 
-        .form-signin input[type="password"] {
+        .form-signin input[name="repeat_password"] {
             margin-bottom: 10px;
             border-top-left-radius: 0;
             border-top-right-radius: 0;
@@ -83,13 +83,23 @@
         </div>
         <div class="form-floating">
             <input type="password" class="form-control @error('password') is-invalid @elseif($errors->any()) is-valid @enderror"
-                   id="floatingPassword" placeholder="Password" name="password" required>
+                   id="password" placeholder="Password" name="password" required>
             <label for="floatingPassword">Password</label>
             @error('password')
             <div class="invalid-tooltip" id="message_name">
                 {{ $message }}
             </div>
             @enderror
+        </div>
+        <div class="form-floating">
+            <input type="password" class="form-control @if ($errors->has('repeat') || $errors->has('repeat_password')) is-invalid @elseif($errors->any()) is-valid @endif"
+                   id="repeat_password" placeholder="Repeat Password" name="repeat_password" required>
+            <label for="repeat_password">Repeat Password</label>
+            @if ($errors->has('repeat') || $errors->has('repeat_password'))
+            <div class="invalid-tooltip" id="message_name">
+                {{ $errors->first('repeat') ? : $errors->first('repeat_password') }}
+            </div>
+            @endif
         </div>
         <button class="w-100 btn btn-lg btn-outline-success mt-3" type="submit">Sign-up</button>
         <a href="./login" class="w-100 btn btn-lg btn-outline-success mt-3">Login</a>
@@ -100,7 +110,6 @@
         objInputs.forEach(function (objInput) {
             if ('form-control  is-invalid ' === objInput.className) {
                 objInput.addEventListener('input', function () {
-                    console.log('hit');
                     objInput.className = 'form-control is-valid';
                     document.getElementById('message_' + objInput.name).remove();
                 });

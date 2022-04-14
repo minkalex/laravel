@@ -5,8 +5,8 @@
 @section('content')
 <div class="d-flex justify-content-end">
     <div class="btn-group mb-5" role="group" aria-label="Basic outlined example">
-        <button type="button" class="btn btn-outline-success">Login</button>
-        <button type="button" class="btn btn-outline-success">Sign-up</button>
+        <a href="{{ route('main') }}/login" class="btn btn-outline-success">Login</a>
+        <a href="{{ route('main') }}/signup" class="btn btn-outline-success">Sign-up</a>
     </div>
 </div>
 <div class="row mb-5">
@@ -50,5 +50,5 @@
         </li>
     </ul>
 </nav>
-<a href="../" type="button" class="btn btn-outline-success">&larr; Home</a>
+<a href="{{ route('main') }}" type="button" class="btn btn-outline-success">&larr; Home</a>
 @endsection

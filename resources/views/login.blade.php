@@ -44,7 +44,7 @@
         }
 
     </style>
-    <form method="post" action="./validation" class="form-signin text-center">
+    <form method="post" action="{{ route('main') }}/login" class="form-signin text-center">
         @csrf
         @error('email')
         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -73,8 +73,9 @@
                 <input type="checkbox" name="remember-me"> Remember me
             </label>
         </div>
-        <button class="w-100 btn btn-lg btn-outline-success" type="submit">Login</button>
-        <a href="./registration" class="w-100 btn btn-lg btn-outline-success mt-3">Sign-up</a>
+        <a href="{{ route('main') }}/forgot" class="link-success">Восстановить пароль</a>
+        <button class="w-100 btn btn-lg btn-outline-success mt-3" type="submit">Login</button>
+        <a href="{{ route('main') }}/signup" class="w-100 btn btn-lg btn-outline-success mt-3">Sign-up</a>
         <p class="mt-5 mb-3 text-muted">&copy; <?php echo date('Y');?></p>
     </form>
 @endsection

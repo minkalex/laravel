@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\User;
@@ -10,9 +11,9 @@ class PostController extends Controller
 {
     /**
      * @param $userId
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function view($userId)
+    public function view($userId): View
     {
         $objPosts = Post::where('user_id', $userId)->orderByDesc('created_at')->get();
         $user = User::find($userId)->full_name;
@@ -24,9 +25,9 @@ class PostController extends Controller
     /**
      * View for index page
      *
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function index()
+    public function index(): View
     {
         $objUsers = User::orderBy('last_name')
             ->orderBy('name', 'asc')

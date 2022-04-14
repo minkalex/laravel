@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Models\Post;
 
 class User extends Authenticatable
 {
@@ -40,12 +41,17 @@ class User extends Authenticatable
     /**
      * Get the user's full name.
      *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     * @return Attribute
      */
     protected function fullName(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => ucfirst($this->last_name) . ' ' . ucfirst($this->name),
         );
+    }
+
+    protected function postsExist()
+    {
+        return $this->hasMany(Post::class);
     }
 }
