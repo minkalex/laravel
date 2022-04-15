@@ -54,12 +54,12 @@ class UsersController extends Controller
             'password' => 'required|max:255',
             'repeat_password' => 'required|max:255',
         ],
-        $messages = [
-            'required' => 'Поле обязательно для заполнения.',
-            'max' => "Максимальная длина поля :max символов.",
-            'email.unique' => 'Пользователь с таким e-mail уже существует.',
-            'email.email' => 'Введите корректный e-mail.',
-        ]);
+            $messages = [
+                'required' => 'Поле обязательно для заполнения.',
+                'max' => "Максимальная длина поля :max символов.",
+                'email.unique' => 'Пользователь с таким e-mail уже существует.',
+                'email.email' => 'Введите корректный e-mail.',
+            ]);
 
         if ($validator->fails()) {
             return redirect('/signup')
@@ -77,15 +77,11 @@ class UsersController extends Controller
     }
 
     /**
-     * @return View|RedirectResponse
+     * @return View
      */
-    public function profile(): View|RedirectResponse
+    public function profile(): View
     {
-        if (Auth::check()) {
-            return view('profile');
-        } else {
-            return redirect('/login');
-        }
+        return view('admin.profile_info');
     }
 
     /**
@@ -98,17 +94,16 @@ class UsersController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
-        $objUsers = User::where('email', $request->input('email'))
-            ->get();
-        $objUser = $objUsers->first();
-        if (Auth::attempt($credentials)) {
+
+        if ($request->input('remember-me')) {
+            $needUserRemember = true;
+        } else {
+            $needUserRemember = false;
+        }
+
+        if (Auth::attempt($credentials, $needUserRemember)) {
             $request->session()->regenerate();
-            if ($request->input('remember-me')) {
-                Auth::login($objUser, true);
-            } else {
-                Auth::login($objUser);
-            }
-            return redirect()->route('profile')->with('user_id', $objUser->id);
+            return redirect()->route('profile');
         }
 
         return back()->withErrors([

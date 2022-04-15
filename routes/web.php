@@ -15,16 +15,26 @@ use App\Http\Controllers\UsersController;
 |
 */
 
-Route::get('/', [PostController::class, 'index'])->name('main');
-Route::get('/user/{user_id}', [PostController::class, 'view']);
+Route::middleware(['check_auth'])->group(function () {
+    Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
+    Route::controller(PostController::class)->group(function () {
+        Route::get('/post/add', 'showPostForm');
+        Route::post('/post/add', 'addPost');
+        Route::get('/posts', 'getPosts');
+    });
+});
 
-Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
+Route::controller(UsersController::class)->group(function () {
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'authenticate');
+    Route::get('/signup', 'showSingUoForm');
+    Route::post('/signup', 'registration')->middleware('pass_match');
+});
 
-Route::get('/login', [UsersController::class, 'showLoginForm']);
-Route::post('/login', [UsersController::class, 'authenticate']);
-
-Route::get('/signup', [UsersController::class, 'showSingUoForm']);
-Route::post('/registration', [UsersController::class, 'registration'])->middleware('pass_match');
+Route::controller(PostController::class)->group(function () {
+    Route::get('/', 'index')->name('main');
+    Route::get('/user/{user_id}', 'view');
+});
 
 Route::fallback(function () {
     return redirect()->route('main');

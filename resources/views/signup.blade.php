@@ -1,4 +1,4 @@
-@extends('bootstrap')
+@extends('layouts.index')
 
 @section('title', "Sing-up")
 
@@ -49,7 +49,7 @@
         }
 
     </style>
-    <form method="post" action="./registration" class="form-signin text-center needs-validation" novalidate>
+    <form method="post" action="./signup" class="form-signin text-center needs-validation" novalidate>
         @csrf
         <div class="form-floating">
             <input type="text" class="form-control @error('last_name') is-invalid @elseif($errors->any()) is-valid @enderror"
