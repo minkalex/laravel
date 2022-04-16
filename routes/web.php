@@ -20,7 +20,7 @@ Route::middleware(['check_auth'])->group(function () {
     Route::controller(PostController::class)->group(function () {
         Route::get('/post/add', 'showPostForm');
         Route::post('/post/add', 'addPost');
-        Route::get('/posts', 'getPosts');
+        Route::get('/posts', 'getPostsOrderByDateDesc')->name('all_user_posts');
     });
 });
 

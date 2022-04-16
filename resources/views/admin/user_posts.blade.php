@@ -4,6 +4,12 @@
 
 @section('content')
     <div class="w-100 p-3">
+        @if (Session::exists('post_add'))
+            <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                <strong>{{ Session::get('post_add') }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         @if(empty($objPosts))
             <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
                 <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
@@ -23,7 +29,7 @@
         @endif
 
         @foreach($objPosts as $index => $objPost)
-            <div class="card">
+            <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">{{ $objPost->title }}</h5>
                     <p class="card-text">{{ $objPost->description }}</p>

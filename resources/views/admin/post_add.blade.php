@@ -23,9 +23,7 @@
             <div class="card-body">
                 <div class="form-floating mb-3">
                     <textarea class="form-control @error('description') is-invalid @elseif($errors->any()) is-valid @enderror"
-                              placeholder="Type your post here" id="description" style="height: 100px" required name="description">
-                        {{ old('description') }}
-                    </textarea>
+                              placeholder="Type your post here" id="description" style="height: 100px" required name="description">{{ old('description') }}</textarea>
                     <label for="description">Type your post here</label>
                     @error('description')
                     <div class="invalid-tooltip" id="message_description">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,7 @@ class UsersController extends Controller
     public function index(): View
     {
         $objUsers = User::all()
-            ->orderBy('last_name')
+            ->orderBy('last_nam')
             ->orderBy('name')
             ->full_name;
         return view('authors')

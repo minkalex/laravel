@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\User;
@@ -17,10 +18,11 @@ class PostController extends Controller
      */
     public function view($userId): View
     {
-        $objPosts = Post::where('user_id', $userId)->orderByDesc('created_at')->get();
-        $user = User::find($userId)->full_name;
+
+        $objUser = User::find($userId);
+        $objPosts = $objUser->posts->sortByDesc('created_at');
         return view('posts')
-            ->with('user', $user)
+            ->with('user', $objUser->full_name)
             ->with('objPosts', $objPosts);
     }
 
@@ -31,33 +33,35 @@ class PostController extends Controller
      */
     public function index(): View
     {
-        $objUsers = User::orderBy('last_name')
-            ->select('users.id', 'last_name', 'name')
-            ->orderBy('name', 'asc')
-            ->join('posts', function ($join) {
-                $join->on('users.id', 'posts.user_id');
-            })
-            ->groupBy('users.id')
+        $objUsers = User::has('posts')
+            ->orderBy('last_name')
+            ->orderBy('name')
             ->get();
-        return view('authors')
-            ->with('objUsers', $objUsers);
+        return view('authors')->with('objUsers', $objUsers);
     }
 
-    public function showPostForm()
+    /**
+     * @return View
+     */
+    public function showPostForm(): View
     {
         return view('admin.post_add');
     }
 
-    public function addPost(Request $request)
+    /**
+     * @param  Request  $request
+     * @return RedirectResponse
+     */
+    public function addPost(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:200',
             'description' => 'required|max:1000',
         ],
-        $messages = [
-            'required' => 'Поле обязательно для заполнения.',
-            'max' => "Максимальная длина поля :max символов.",
-        ]);
+            $messages = [
+                'required' => 'Поле обязательно для заполнения.',
+                'max' => "Максимальная длина поля :max символов.",
+            ]);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -70,10 +74,11 @@ class PostController extends Controller
             'description' => $request->description,
             'user_id' => Auth::id(),
         ]);
-        return redirect('/posts');
+        $request->session()->flash('post_add', 'Пост успешно создан!');
+        return redirect()->route('all_user_posts');
     }
 
-    public function getPosts()
+    public function getPostsOrderByDateDesc()
     {
         $objPosts = Post::where('user_id', Auth::id())->orderByDesc('created_at')->get();
         return view('admin.user_posts')
