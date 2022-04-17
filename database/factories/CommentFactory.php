@@ -22,9 +22,9 @@ class CommentFactory extends Factory
             $description .= $this->faker->realText() . "\r\n";
         }
         return [
-            'user_id' => $this->faker->numberBetween(1, 7),
+            'user_id' => $this->faker->numberBetween(1, 5),
             'text' => $this->faker->realText(),
-            'commentable_id' => $this->faker->numberBetween(1, 106),
+            'commentable_id' => $this->faker->numberBetween(1, 100),
             'commentable_type' => 'App\Models\Post',
         ];
     }

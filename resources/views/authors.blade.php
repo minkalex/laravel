@@ -3,12 +3,6 @@
 @section('title', 'Authors')
 
 @section('content')
-    <div class="d-flex justify-content-end">
-        <div class="btn-group mb-5" role="group" aria-label="Basic outlined example">
-            <a href="./login" class="btn btn-outline-success">Login</a>
-            <a href="./signup" class="btn btn-outline-success">Sign-up</a>
-        </div>
-    </div>
     <div class="row" style="flex-wrap: unset; ">
         <div class="list-group col-4 list-group-flush">
             <li class="list-group-item list-group-item-success" aria-current="true">

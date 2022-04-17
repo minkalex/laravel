@@ -17,10 +17,12 @@ use App\Http\Controllers\UsersController;
 
 Route::middleware(['check_auth'])->group(function () {
     Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
+    Route::get('/logout', [UsersController::class, 'logout'])->name('logout');
     Route::controller(PostController::class)->group(function () {
         Route::get('/post/add', 'showPostForm');
         Route::post('/post/add', 'addPost');
         Route::get('/posts', 'getPostsOrderByDateDesc')->name('all_user_posts');
+        Route::post('/user/{user_id}', 'store');
     });
 });
 

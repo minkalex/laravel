@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,12 +19,26 @@ class PostController extends Controller
      */
     public function view($userId): View
     {
-
         $objUser = User::find($userId);
-        $objPosts = $objUser->posts->sortByDesc('created_at');
+        $objComments = collect([]);
+        if (Auth::check()) {
+            $objPosts = Post::where('user_id', $userId)->with('comments')->orderByDesc('created_at')->get();
+            foreach ($objPosts as $objPost) {
+                $objPost->comments->sortByDesc('created_at');
+                foreach ($objPost->comments as $objComment) {
+                    $comments = Comment::find($objComment->id)->comments->sortByDesc('created_at');
+                    if ($comments->isNotEmpty()) {
+                        $objComments->push([$objComment->id => $comments]);
+                    }
+                }
+            }
+        } else {
+            $objPosts = $objUser->posts->sortByDesc('created_at');
+        }
         return view('posts')
             ->with('user', $objUser->full_name)
-            ->with('objPosts', $objPosts);
+            ->with('objPosts', $objPosts)
+            ->with('objComments', $objComments);
     }
 
     /**
@@ -83,5 +98,32 @@ class PostController extends Controller
         $objPosts = Post::where('user_id', Auth::id())->orderByDesc('created_at')->get();
         return view('admin.user_posts')
             ->with('objPosts', $objPosts);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|max:200',
+        ],
+            $messages = [
+                'required' => 'Поле обязательно для заполнения.',
+                'max' => "Максимальная длина поля :max символов.",
+            ]);
+
+        if ($validator->fails()) {
+            $request->session()->flash('comment_error', 'Комментарий не был добавлен!');
+            return redirect($request->url())
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        Comment::create([
+            'user_id' => Auth::id(),
+            'text' => $request->comment,
+            'commentable_id' => $request->post_id,
+            'commentable_type' => 'App\Models\Post',
+        ]);
+        $request->session()->flash('comment_add', 'Комментарий успешно добавлен!');
+        return redirect($request->url());
     }
 }

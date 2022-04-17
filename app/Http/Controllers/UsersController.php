@@ -87,6 +87,25 @@ class UsersController extends Controller
 
     /**
      * @param  Request  $request
+     * @return RedirectResponse
+     */
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        if (false !== str_contains(url()->previous(), 'profile')) {
+            return redirect()->route('main');
+        } else {
+            return back();
+        }
+    }
+
+    /**
+     * @param  Request  $request
      * @return View|RedirectResponse
      */
     public function authenticate(Request $request): View|RedirectResponse
@@ -104,7 +123,7 @@ class UsersController extends Controller
 
         if (Auth::attempt($credentials, $needUserRemember)) {
             $request->session()->regenerate();
-            return redirect()->route('profile');
+            return redirect()->route('main');
         }
 
         return back()->withErrors([
