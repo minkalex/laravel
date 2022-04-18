@@ -93,37 +93,53 @@ class PostController extends Controller
         return redirect()->route('all_user_posts');
     }
 
-    public function getPostsOrderByDateDesc()
+    /**
+     * @return View
+     */
+    public function getPostsOrderByDateDesc(): View
     {
         $objPosts = Post::where('user_id', Auth::id())->orderByDesc('created_at')->get();
         return view('admin.user_posts')
             ->with('objPosts', $objPosts);
     }
 
-    public function store(Request $request)
+    public function showEditForm()
     {
+        $arUrl = explode("/", url()->current());
+        //post_id from url
+        $objPost = Post::find($arUrl[6]);
+        return view('posts.edit')
+            ->with('objPost', $objPost);
+    }
+
+    public function edit(Post $post, Request $request)
+    {
+        dd('123213213');
+        $arUrl = explode("/", url()->current());
+        //post_id from url
         $validator = Validator::make($request->all(), [
-            'comment' => 'required|max:200',
-        ],
-            $messages = [
-                'required' => 'Поле обязательно для заполнения.',
-                'max' => "Максимальная длина поля :max символов.",
-            ]);
-
-        if ($validator->fails()) {
-            $request->session()->flash('comment_error', 'Комментарий не был добавлен!');
-            return redirect($request->url())
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        Comment::create([
-            'user_id' => Auth::id(),
-            'text' => $request->comment,
-            'commentable_id' => $request->post_id,
-            'commentable_type' => 'App\Models\Post',
+            'title' => 'required|max:200',
+            'description' => 'required|max:1000',
         ]);
-        $request->session()->flash('comment_add', 'Комментарий успешно добавлен!');
-        return redirect($request->url());
+        if ($validator->fails()) {
+            echo 'error';
+            $request->session()->flash('post_error', 'Пост не изменен!');
+        } else {
+            $post->title = $request->title;
+            $post->description = $request->description;
+            $post->save();
+            echo 'success';
+            $request->session()->flash('post_edited', 'Пост успешно изменен!');
+        }
+        $this->getPostsOrderByDateDesc();
+    }
+
+    public function destroy(Post $post, Request $request)
+    {
+        dd('asdsad');
+        $post->delete();
+        echo 'success';
+        $request->session()->flash('post_edited', 'Пост успешно удален!');
+        $this->getPostsOrderByDateDesc();
     }
 }

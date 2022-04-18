@@ -20,6 +20,18 @@ class CheckAuth
         if (!Auth::check()) {
             return redirect()->route('login');
         }
+
+        $position = strpos(url()->current(), '/user/');
+
+        if (false !== $position) {
+            $arUrl = explode("/", url()->current());
+            //user_id from url
+            $needUser = $arUrl[4];
+            if (Auth::id() != $needUser) {
+                return redirect()->route('login');
+            }
+        }
+
         return $next($request);
     }
 }

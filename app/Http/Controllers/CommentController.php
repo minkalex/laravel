@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
+use App\Models\Post;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
@@ -29,14 +33,37 @@ class CommentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StoreCommentRequest  $request
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return RedirectResponse
      */
-    public function store(StoreCommentRequest $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|max:200',
+        ],
+            $messages = [
+                'required' => 'Поле обязательно для заполнения.',
+                'max' => "Максимальная длина поля :max символов.",
+            ]);
+
+        if ($validator->fails()) {
+            $request->session()->flash('comment_error', 'Комментарий не был добавлен!');
+            return redirect($request->url())
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $comment = new Comment(['user_id' => Auth::id(), 'text' => $request->comment]);
+
+        if ($request->has('comment_id')) {
+            $parent = Comment::find($request->comment_id);
+        } else {
+            $parent = Post::find($request->post_id);
+        }
+
+        $parent->comments()->save($comment);
+        $request->session()->flash('comment_add', 'Комментарий успешно добавлен!');
+        return redirect($request->url());
     }
 
     /**

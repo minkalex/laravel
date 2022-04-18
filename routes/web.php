@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UsersController;
@@ -18,13 +19,21 @@ use App\Http\Controllers\UsersController;
 Route::middleware(['check_auth'])->group(function () {
     Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
     Route::get('/logout', [UsersController::class, 'logout'])->name('logout');
+
     Route::controller(PostController::class)->group(function () {
         Route::get('/post/add', 'showPostForm');
         Route::post('/post/add', 'addPost');
         Route::get('/posts', 'getPostsOrderByDateDesc')->name('all_user_posts');
-        Route::post('/user/{user_id}', 'store');
+
+        //Route::get('/user/{user_id}/post/{post_id}/edit', 'showEditForm');
+        //Route::put('/user/{user_id}/post/{post_id}/edit', 'edit');
+        //Route::delete('/user/{user_id}/post/{post_id}/delete', 'destroy');
     });
+
+    Route::post('/user/{user_id}', [CommentController::class, 'store']);
 });
+
+Route::resource('blog', 'BlogController');
 
 Route::controller(UsersController::class)->group(function () {
     Route::get('/login', 'showLoginForm')->name('login');

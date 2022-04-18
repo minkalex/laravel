@@ -33,8 +33,8 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ $objPost->title }}</h5>
                     <p class="card-text">{{ $objPost->description }}</p>
-                    <a href="/post/edit/{{ $objPost->id }}" class="btn btn-outline-success">Edit</a>
-                    <a href="/post/delete/{{ $objPost->id }}" class="btn btn-outline-danger">Delete</a>
+                    <a href="{{ route('main') }}/blog/{{ $objPost->id }}/edit" class="btn btn-outline-success">Edit</a>
+                    <a href="{{ route('main') }}/blog/{{ $objPost->id }}/delete" class="btn btn-outline-danger">Delete</a>
                 </div>
                 <div class="card-footer text-muted text-end">
                     {{ $objPost->created_at->format('d.m.Y H:i') }}
@@ -44,5 +44,15 @@
     </div>
     <script>
         document.getElementById('posts').className = 'nav-link active';
+        /*function deletePost(post_id)
+        {
+            if (window.confirm("Вы действительно хотите удалить пост?")) {
+                let oReq = new XMLHttpRequest();
+                let objForm = new FormData();
+                objForm.append('_token', "{{ csrf_token() }}");
+                oReq.open("DELETE", "{{ route('main') }}/user/{{ \Illuminate\Support\Facades\Auth::id() }}/post/" + post_id + "/delete");
+                oReq.send(objForm);
+            }
+        }*/
     </script>
 @endsection
