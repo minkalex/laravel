@@ -33,8 +33,8 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ $objPost->title }}</h5>
                     <p class="card-text">{{ $objPost->description }}</p>
-                    <a href="{{ route('main') }}/blog/{{ $objPost->id }}/edit" class="btn btn-outline-success">Edit</a>
-                    <a href="{{ route('main') }}/blog/{{ $objPost->id }}/delete" class="btn btn-outline-danger">Delete</a>
+                    <a href="{{ route('main') }}/posts/{{ $objPost->id }}/edit" class="btn btn-outline-success">Edit</a>
+                    <a href="{{ route('main') }}/posts/{{ $objPost->id }}/delete" class="btn btn-outline-danger">Delete</a>
                 </div>
                 <div class="card-footer text-muted text-end">
                     {{ $objPost->created_at->format('d.m.Y H:i') }}

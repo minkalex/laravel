@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
+use App\Http\Requests\StoreUserRequest;
+
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -37,50 +38,28 @@ class UsersController extends Controller
     /**
      * @return View
      */
-    public function showSingUoForm(): View
+    public function create(): View
     {
         return view('signup');
     }
 
     /**
-     * @param  Request  $request
+     * @param  StoreUserRequest  $request
      * @return RedirectResponse
      */
-    public function registration(Request $request): RedirectResponse
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        $validator = Validator::make($request->all(), [
-            'last_name' => 'required|max:255',
-            'name' => 'required|max:255',
-            'email' => 'required|unique:users|max:255|email:rfc,dns',
-            'password' => 'required|max:255',
-            'repeat_password' => 'required|max:255',
-        ],
-            $messages = [
-                'required' => 'Поле обязательно для заполнения.',
-                'max' => "Максимальная длина поля :max символов.",
-                'email.unique' => 'Пользователь с таким e-mail уже существует.',
-                'email.email' => 'Введите корректный e-mail.',
-            ]);
-
-        if ($validator->fails()) {
-            return redirect('/signup')
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        User::create([
-            'last_name' => $request->last_name,
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $validated = $request->safe()->except(['repeat_password']);
+        $validated['password'] = Hash::make($validated['password']);
+        User::create($validated);
         return redirect('/login');
     }
 
     /**
+     * @param  User  $user
      * @return View
      */
-    public function profile(): View
+    public function show(User $user): View
     {
         return view('admin.profile_info');
     }

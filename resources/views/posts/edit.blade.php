@@ -4,38 +4,41 @@
 
 @section('content')
     <div class="w-100 p-3">
-        <div class="card">
-            <h5 class="card-header">
-                <div class="form-floating mb-3">
-                    <input type="text"
-                           class="form-control @error('title') is-invalid @elseif($errors->any()) is-valid @enderror"
-                           value="{{ $objPost->title ? : old('title') }}" id="title" placeholder="Title" required
-                           name="title">
-                    <label for="title">Title</label>
-                    @error('title')
-                    <div class="invalid-tooltip" id="message_title">
-                        {{ $message }}
+        <form action="{{ route('main') }}/posts/{{ $objPost->id }}" method="post">
+            @method('PUT')
+            @csrf
+            <div class="card">
+                <h5 class="card-header">
+                    <div class="form-floating mb-3">
+                        <input type="text"
+                               class="form-control @error('title') is-invalid @elseif($errors->any()) is-valid @enderror"
+                               value="{{ $objPost->title ? : old('title') }}" id="title" placeholder="Title" required
+                               name="title">
+                        <label for="title">Title</label>
+                        @error('title')
+                        <div class="invalid-tooltip" id="message_title">
+                            {{ $message }}
+                        </div>
+                        @enderror
                     </div>
-                    @enderror
-                </div>
-            </h5>
-            <div class="card-body">
-                <div class="form-floating mb-3">
-                <textarea
-                    class="form-control @error('description') is-invalid @elseif($errors->any()) is-valid @enderror"
-                    placeholder="Type your post here" id="description" style="height: 100px" required
-                    name="description">{{ $objPost->description ? : old('description') }}</textarea>
-                    <label for="description">Type your post here</label>
-                    @error('description')
-                    <div class="invalid-tooltip" id="message_description">
-                        {{ $message }}
+                </h5>
+                <div class="card-body">
+                    <div class="form-floating mb-3">
+                    <textarea
+                        class="form-control @error('description') is-invalid @elseif($errors->any()) is-valid @enderror"
+                        placeholder="Type your post here" id="description" style="height: 100px" required
+                        name="description">{{ $objPost->description ? : old('description') }}</textarea>
+                        <label for="description">Type your post here</label>
+                        @error('description')
+                        <div class="invalid-tooltip" id="message_description">
+                            {{ $message }}
+                        </div>
+                        @enderror
                     </div>
-                    @enderror
+                    <button type="submit" class="btn btn-outline-success">Save</button>
                 </div>
-                <button type="button" class="btn btn-outline-success" onclick="editPost({{ $objPost->id }})">Save
-                </button>
             </div>
-        </div>
+        </form>
     </div>
 
     <script>
@@ -57,15 +60,6 @@
             });
         }
 
-        function editPost(post_id) {
-            let oReq = new XMLHttpRequest();
-            let objForm = new FormData();
-            objForm.append('_token', "{{ csrf_token() }}");
-            objForm.append('title', document.getElementById('title').value);
-            objForm.append('description', document.getElementById('description').value);
-            oReq.open("PUT", "{{ route('main') }}/user/{{ \Illuminate\Support\Facades\Auth::id() }}/post/" + post_id + "/edit");
-            oReq.send(objForm);
-        }
     </script>
 
 @endsection
