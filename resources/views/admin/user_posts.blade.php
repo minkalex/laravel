@@ -4,9 +4,9 @@
 
 @section('content')
     <div class="w-100 p-3">
-        @if (Session::exists('post_add'))
+        @if (Session::exists('post_add') || Session::exists('post_edited'))
             <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-                <strong>{{ Session::get('post_add') }}</strong>
+                <strong>{{ Session::get('post_add') ? : Session::get('post_edited')}}</strong>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
@@ -31,10 +31,14 @@
         @foreach($objPosts as $index => $objPost)
             <div class="card mb-3">
                 <div class="card-body">
+                    <form action="{{ route('main') }}/posts/{{ $objPost->id }}" method="post" onsubmit="confirm()">
+                        @csrf
+                        @method('DELETE')
                     <h5 class="card-title">{{ $objPost->title }}</h5>
                     <p class="card-text">{{ $objPost->description }}</p>
                     <a href="{{ route('main') }}/posts/{{ $objPost->id }}/edit" class="btn btn-outline-success">Edit</a>
-                    <a href="{{ route('main') }}/posts/{{ $objPost->id }}/delete" class="btn btn-outline-danger">Delete</a>
+                        <button type="submit" class="btn btn-outline-danger">Delete</button>
+                    </form>
                 </div>
                 <div class="card-footer text-muted text-end">
                     {{ $objPost->created_at->format('d.m.Y H:i') }}
@@ -44,6 +48,13 @@
     </div>
     <script>
         document.getElementById('posts').className = 'nav-link active';
+
+        function confirm()
+        {
+            if (window.confirm("Вы действительно хотите удалить пост?")) {
+                //NOP
+            }
+        }
         /*function deletePost(post_id)
         {
             if (window.confirm("Вы действительно хотите удалить пост?")) {

@@ -119,16 +119,19 @@ class PostController extends Controller
         $post->title = $request->title;
         $post->description = $request->description;
         $post->save();
-        $request->session()->flash('post_edited', 'Пост успешно иßзменен!');
+        $request->session()->flash('post_edited', 'Пост успешно изменен!');
         return redirect()->route('all_user_posts');
     }
 
-    public function destroy(Post $post, Request $request)
+    public function destroy(Post $post)
     {
-        dd('asdsad');
-        $post->delete();
-        echo 'success';
-        $request->session()->flash('post_edited', 'Пост успешно удален!');
-        $this->getPostsOrderByDateDesc();
+        if (Auth::user()->can('delete', $post)) {
+            $post->delete();
+            session()->flash('post_edited', 'Пост успешно удален!');
+            return redirect()->route('all_user_posts');
+        } else {
+            abort(403);
+            return false;
+        }
     }
 }
