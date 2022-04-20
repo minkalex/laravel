@@ -27,16 +27,15 @@ class PostController extends Controller
         if (Auth::check()) {
             $objPosts = Post::where('user_id', $userId)->with('comments')->orderByDesc('created_at')->get();
             foreach ($objPosts as $objPost) {
-                $objPost->comments->sortByDesc('created_at');
                 foreach ($objPost->comments as $objComment) {
-                    $comments = Comment::find($objComment->id)->comments->sortByDesc('created_at');
+                    $comments = Comment::find($objComment->id)->comments;
                     if ($comments->isNotEmpty()) {
                         $objComments->push([$objComment->id => $comments]);
                     }
                 }
             }
         } else {
-            $objPosts = $objUser->posts->sortByDesc('created_at');
+            $objPosts = $objUser->posts;
         }
         return view('posts')
             ->with('user', $objUser->full_name)

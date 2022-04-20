@@ -26,6 +26,6 @@ class Post extends Model
      */
     public function comments(): MorphMany
     {
-        return $this->morphMany(Comment::class, 'commentable');
+        return $this->morphMany(Comment::class, 'commentable')->orderByDesc('created_at');
     }
 }
