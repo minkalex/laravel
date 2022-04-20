@@ -67,20 +67,17 @@ class PostController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     *
      * @param  StorePostRequest  $request
      * @return bool|RedirectResponse
      */
     public function store(StorePostRequest $request): bool|RedirectResponse
     {
-        if ($request->user()->can('create', Post::class)) {
-            $request['user_id'] = $request->user()->id;
-            Post::create($request->all());
-            $request->session()->flash('post_add', 'Пост успешно создан!');
-            return redirect()->route('all_user_posts');
-        } else {
-            abort(403);
-            return false;
-        }
+        $request['user_id'] = $request->user()->id;
+        Post::create($request->all());
+        $request->session()->flash('post_add', 'Пост успешно создан!');
+        return redirect()->route('all_user_posts');
     }
 
     /**
@@ -94,18 +91,18 @@ class PostController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
      * @param  Post  $post
      * @return View|bool
      */
     public function edit(Post $post): View|bool
     {
-        if (Auth::user()->can('update', $post)) {
-            return view('posts.edit')
-                ->with('objPost', $post);
-        } else {
+        if (Auth::user()->cannot('update', $post)) {
             abort(403);
-            return false;
         }
+        return view('posts.edit')
+            ->with('objPost', $post);
     }
 
     /**
@@ -113,8 +110,9 @@ class PostController extends Controller
      *
      * @param  UpdatePostRequest  $request
      * @param  Post  $post
+     * @return RedirectResponse
      */
-    public function update(UpdatePostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post): RedirectResponse
     {
         $post->title = $request->title;
         $post->description = $request->description;
@@ -123,15 +121,16 @@ class PostController extends Controller
         return redirect()->route('all_user_posts');
     }
 
-    public function destroy(Post $post)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  Post  $post
+     * @return RedirectResponse
+     */
+    public function destroy(Post $post): RedirectResponse
     {
-        if (Auth::user()->can('delete', $post)) {
-            $post->delete();
-            session()->flash('post_edited', 'Пост успешно удален!');
-            return redirect()->route('all_user_posts');
-        } else {
-            abort(403);
-            return false;
-        }
+        $post->delete();
+        session()->flash('post_edited', 'Пост успешно удален!');
+        return redirect()->route('all_user_posts');
     }
 }

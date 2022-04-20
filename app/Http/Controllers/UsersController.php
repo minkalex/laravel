@@ -49,8 +49,8 @@ class UsersController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        $validated = $request->safe()->except(['repeat_password']);
-        $validated['password'] = Hash::make($validated['password']);
+        $validated = $request->all();
+        $validated['password'] = Hash::make($request->password);
         User::create($validated);
         return redirect('/login');
     }
