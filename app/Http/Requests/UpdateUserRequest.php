@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
-class StoreCommentRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,7 +13,7 @@ class StoreCommentRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check();
+        return true;
     }
 
     /**
@@ -25,7 +24,10 @@ class StoreCommentRequest extends FormRequest
     public function rules()
     {
         return [
-            'comment' => 'required|max:200',
+            'last_name' => 'required|max:255',
+            'name' => 'required|max:255',
+            'email' => 'required|max:255|email:rfc,dns',
+            'password' => 'max:255',
         ];
     }
 
@@ -39,6 +41,8 @@ class StoreCommentRequest extends FormRequest
         return [
             'required' => 'Поле обязательно для заполнения.',
             'max' => "Максимальная длина поля :max символов.",
+            'email.unique' => 'Пользователь с таким e-mail уже существует.',
+            'email.email' => 'Введите корректный e-mail.',
         ];
     }
 }

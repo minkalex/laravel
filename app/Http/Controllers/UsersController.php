@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
-
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class UsersController extends Controller
 {
@@ -19,10 +18,10 @@ class UsersController extends Controller
      */
     public function index(): View
     {
-        $objUsers = User::all()
-            ->orderBy('last_nam')
+        $objUsers = User::has('posts')
+            ->orderBy('last_name')
             ->orderBy('name')
-            ->full_name;
+            ->get();
         return view('authors')
             ->with('objUsers', $objUsers);
     }
@@ -62,6 +61,41 @@ class UsersController extends Controller
     public function show(User $user): View
     {
         return view('admin.profile_info');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  User  $user
+     * @return View
+     */
+    public function edit(User $user): View
+    {
+        if (Auth::user()->cannot('update', $user)) {
+            abort(403);
+        }
+        return view('admin.profile_edit')
+            ->with(compact('user'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  UpdateUserRequest  $request
+     * @param  User  $user
+     * @return RedirectResponse
+     */
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    {
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->last_name = $request->last_name;
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
+        $request->session()->flash('profile_edited', 'Ваши данные успешно обновлены!');
+        return redirect()->route('profile');
     }
 
     /**

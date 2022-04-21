@@ -19,6 +19,7 @@
             </a>
             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2" style="font-size: 85%">
                 <li><a class="dropdown-item" href="{{ route('profile') }}">Profile</a></li>
+                <li><a class="dropdown-item" href="{{ route('main') }}/users/{{ Auth::user()->id }}/edit">Edit</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{{ route('logout') }}">Sign out</a></li>
             </ul>

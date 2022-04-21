@@ -20,7 +20,7 @@ class PostController extends Controller
      * @param $userId
      * @return View
      */
-    public function view($userId): View
+    public function showUserPosts($userId): View
     {
         $objUser = User::find($userId);
         $objComments = collect([]);
@@ -39,22 +39,7 @@ class PostController extends Controller
         }
         return view('posts')
             ->with('user', $objUser->full_name)
-            ->with('objPosts', $objPosts)
-            ->with('objComments', $objComments);
-    }
-
-    /**
-     * View for index page
-     *
-     * @return View
-     */
-    public function index(): View
-    {
-        $objUsers = User::has('posts')
-            ->orderBy('last_name')
-            ->orderBy('name')
-            ->get();
-        return view('authors')->with('objUsers', $objUsers);
+            ->with(compact('objPosts', 'objComments'));
     }
 
     /**
@@ -69,9 +54,9 @@ class PostController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StorePostRequest  $request
-     * @return bool|RedirectResponse
+     * @return RedirectResponse
      */
-    public function store(StorePostRequest $request): bool|RedirectResponse
+    public function store(StorePostRequest $request): RedirectResponse
     {
         $request['user_id'] = $request->user()->id;
         Post::create($request->all());
@@ -82,7 +67,7 @@ class PostController extends Controller
     /**
      * @return View
      */
-    public function getPostsOrderByDateDesc(): View
+    public function showPostsInAdmin(): View
     {
         $objPosts = Post::where('user_id', Auth::id())->orderByDesc('created_at')->get();
         return view('admin.user_posts')
@@ -97,9 +82,6 @@ class PostController extends Controller
      */
     public function edit(Post $post): View|bool
     {
-        if (Auth::user()->cannot('update', $post)) {
-            abort(403);
-        }
         return view('posts.edit')
             ->with('objPost', $post);
     }

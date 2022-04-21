@@ -31,15 +31,9 @@
             </div>
         </div>
         <div class="col-8">
-            @if (Session::exists('comment_add'))
+            @if (Session::exists('comment_add') || Session::exists('comment_deleted'))
                 <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-                    <strong>{{ Session::get('comment_add') }}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-            @if (Session::exists('comment_error'))
-                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-                    <strong>{{ Session::get('comment_error') }}</strong>
+                    <strong>{{ Session::get('comment_add') ? : Session::get('comment_deleted')}}</strong>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
@@ -64,24 +58,38 @@
                             @if (!empty($objPost->comments))
                                 <p class="fs-4 mt-5">Comments</p>
                                 <div class="list-group list-group-flush">
-                                    @for($i = $objPost->comments->count() - 1; $i >= 0; $i--)
+                                    @foreach($objPost->comments as $comment)
                                         <div class="list-group-item">
-                                            <h5 class="mb-1">{{ \App\Models\User::find($objPost->comments->get($i)->user_id)->full_name }}</h5>
-                                            <p class="mb-1">{{ $objPost->comments->get($i)->text }}</p>
-                                            <small>{{ $objPost->comments->get($i)->created_at->format('d.m.Y H:i') }}</small>
+                                            <h5 class="mb-1">{{ \App\Models\User::find($comment->user_id)->full_name }}</h5>
+                                            <p class="mb-1">{{ $comment->text }}</p>
+                                            <div class="d-flex justify-content-between">
+                                                <small>{{ $comment->created_at->format('d.m.Y H:i') }}</small>
+                                                @if(Auth::user()->can('delete', $comment))
+                                                    <form
+                                                        action="{{ route('main') }}/comments/{{ $comment->id }}"
+                                                        method="post">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                                class="btn btn-outline-danger btn-sm">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                             <?php $subCommentsExist = false;?>
                                             @foreach($objComments as $obComments)
                                                 @foreach($obComments as $index => $objComment)
-                                                    @if ($index === $objPost->comments->get($i)->id)
+                                                    @if ($index === $comment->id)
                                                         <?php $subCommentsExist = true;?>
                                                         <div>
                                                             <p>
                                                                 <button
                                                                     class="btn btn-link d-flex align-items-center text-decoration-none"
                                                                     type="button" data-bs-toggle="collapse"
-                                                                    data-bs-target="#subcommentsToComment{{ $objPost->comments->get($i)->id }}"
+                                                                    data-bs-target="#subcommentsToComment{{ $comment->id }}"
                                                                     aria-expanded="false"
-                                                                    aria-controls="subcommentsToComment{{ $objPost->comments->get($i)->id }}">
+                                                                    aria-controls="subcommentsToComment{{ $comment->id }}">
                                                                     Sub comments
                                                                     <svg class="bi flex-shrink-0 me-2" width="24"
                                                                          height="24"
@@ -91,13 +99,27 @@
                                                                 </button>
                                                             </p>
                                                             <div class="collapse"
-                                                                 id="subcommentsToComment{{ $objPost->comments->get($i)->id }}">
+                                                                 id="subcommentsToComment{{ $comment->id }}">
                                                                 <div class="list-group list-group-flush ms-5">
                                                                     @foreach($objComment as $cmmnt)
                                                                         <div class="list-group-item">
                                                                             <h5 class="mb-1">{{ \App\Models\User::find($cmmnt->user_id)->full_name }}</h5>
                                                                             <p class="mb-1">{{ $cmmnt->text }}</p>
-                                                                            <small>{{ $cmmnt->created_at->format('d.m.Y H:i') }}</small>
+                                                                            <div class="d-flex justify-content-between">
+                                                                                <small>{{ $cmmnt->created_at->format('d.m.Y H:i') }}</small>
+                                                                                @if(Auth::user()->can('delete', $cmmnt))
+                                                                                    <form
+                                                                                        action="{{ route('main') }}/comments/{{ $cmmnt->id }}"
+                                                                                        method="post">
+                                                                                        @csrf
+                                                                                        @method('DELETE')
+                                                                                        <button type="submit"
+                                                                                                class="btn btn-outline-danger btn-sm">
+                                                                                            Delete
+                                                                                        </button>
+                                                                                    </form>
+                                                                                @endif
+                                                                            </div>
                                                                         </div>
                                                                     @endforeach
                                                                 </div>
@@ -111,7 +133,7 @@
                                                                         <label for="floatingTextarea">Your comment
                                                                             here...</label>
                                                                     </div>
-                                                                    <input value="{{ $objPost->comments->get($i)->id }}"
+                                                                    <input value="{{ $comment->id }}"
                                                                            type="hidden"
                                                                            name="comment_id">
                                                                     <div class="mt-1 d-flex justify-content-end">
@@ -132,9 +154,9 @@
                                                         <button
                                                             class="btn btn-link d-flex align-items-center text-decoration-none"
                                                             type="button" data-bs-toggle="collapse"
-                                                            data-bs-target="#subcommentsToComment{{ $objPost->comments->get($i)->id }}"
+                                                            data-bs-target="#subcommentsToComment{{ $comment->id }}"
                                                             aria-expanded="false"
-                                                            aria-controls="subcommentsToComment{{ $objPost->comments->get($i)->id }}">
+                                                            aria-controls="subcommentsToComment{{ $comment->id }}">
                                                             Add sub comment
                                                             <svg class="bi flex-shrink-0 me-2" width="24"
                                                                  height="24"
@@ -144,7 +166,7 @@
                                                         </button>
                                                     </p>
                                                     <div class="collapse"
-                                                         id="subcommentsToComment{{ $objPost->comments->get($i)->id }}">
+                                                         id="subcommentsToComment{{ $comment->id }}">
                                                         <form action="" method="post">
                                                             @csrf
                                                             <div class="form-floating mt-5 ms-5">
@@ -155,7 +177,7 @@
                                                                 <label for="floatingTextarea">Your comment
                                                                     here...</label>
                                                             </div>
-                                                            <input value="{{ $objPost->comments->get($i)->id }}"
+                                                            <input value="{{ $comment->id }}"
                                                                    type="hidden"
                                                                    name="comment_id">
                                                             <div class="mt-1 d-flex justify-content-end">
@@ -169,7 +191,7 @@
                                                 </div>
                                             @endif
                                         </div>
-                                    @endfor
+                                    @endforeach
                                 </div>
                             @endif
                         @endif

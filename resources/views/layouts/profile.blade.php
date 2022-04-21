@@ -144,13 +144,7 @@
             <li>
                 <a href="{{ route('main') }}/posts" class="nav-link text-white" id="posts">
                     <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"/></svg>
-                    Your post
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('main') }}/user/{{ \Illuminate\Support\Facades\Auth::id() }}/comments" class="nav-link text-white" id="posts">
-                    <svg class="bi me-2" width="16" height="16"><use xlink:href="#comments"/></svg>
-                    Your comments
+                    Your posts
                 </a>
             </li>
         </ul>
@@ -161,9 +155,8 @@
                 <strong>{{ Auth::user()->full_name }}</strong>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-                <li><a class="dropdown-item" href="{{ route('main') }}/post/add">New post...</a></li>
-                <li><a class="dropdown-item" href="#">Settings</a></li>
-                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li><a class="dropdown-item" href="{{ route('main') }}/users/{{ Auth::user()->id }}/edit">Edit</a></li>
+                <li><a class="dropdown-item" href="{{ route('main') }}/profile">Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{{ route('main') }}/logout">Sign out</a></li>
             </ul>

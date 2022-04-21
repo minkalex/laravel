@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
 use App\Models\Post;
@@ -33,26 +34,13 @@ class CommentController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * Store a newly created resource in storage.
+     *
+     * @param  StoreCommentRequest  $request
      * @return RedirectResponse
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreCommentRequest $request): RedirectResponse
     {
-        $validator = Validator::make($request->all(), [
-            'comment' => 'required|max:200',
-        ],
-            $messages = [
-                'required' => 'Поле обязательно для заполнения.',
-                'max' => "Максимальная длина поля :max символов.",
-            ]);
-
-        if ($validator->fails()) {
-            $request->session()->flash('comment_error', 'Комментарий не был добавлен!');
-            return redirect($request->url())
-                ->withErrors($validator)
-                ->withInput();
-        }
-
         $comment = new Comment(['user_id' => Auth::id(), 'text' => $request->comment]);
 
         if ($request->has('comment_id')) {
@@ -62,14 +50,14 @@ class CommentController extends Controller
         }
 
         $parent->comments()->save($comment);
-        $request->session()->flash('comment_add', 'Комментарий успешно добавлен!');
+        $request->session()->flash('comment_add', 'Комментарий добавлен!');
         return redirect($request->url());
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Comment  $comment
+     * @param  Comment  $comment
      * @return \Illuminate\Http\Response
      */
     public function show(Comment $comment)
@@ -80,7 +68,7 @@ class CommentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Comment  $comment
+     * @param  Comment  $comment
      * @return \Illuminate\Http\Response
      */
     public function edit(Comment $comment)
@@ -92,7 +80,7 @@ class CommentController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateCommentRequest  $request
-     * @param  \App\Models\Comment  $comment
+     * @param  Comment  $comment
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateCommentRequest $request, Comment $comment)
@@ -103,11 +91,13 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
+     * @param  Comment  $comment
+     * @return RedirectResponse
      */
-    public function destroy(Comment $comment)
+    public function destroy(Comment $comment): RedirectResponse
     {
-        //
+        $comment->delete();
+        session()->flash('comment_deleted', 'Комментарий удален!');
+        return redirect()->back();
     }
 }
