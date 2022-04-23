@@ -9,7 +9,7 @@
                   d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
         </symbol>
     </svg>
-    <div class="row mb-5">
+    <div class="row mb-5" id="app">
         <div class="col-4">
             <div class="list-group" id="list-tab" role="tablist">
                 <li class="list-group-item list-group-item-success" aria-disabled="true">
@@ -23,7 +23,7 @@
                 </li>
                 @foreach ($objPosts as $objPost)
                     <a class="list-group-item list-group-item-action" id="post-{{ $objPost->id }}" data-bs-toggle="list"
-                       href="#list-post-{{ $objPost->id }}" role="tab" aria-controls="list-post-{{ $objPost->id }}">
+                       href="#list-post-{{ $objPost->id }}" role="tab" aria-controls="list-post-{{ $objPost->id }}" ref="sd">
                         {{ $objPost->title }}
                         <p class="text-end mb-0"><small>{{ $objPost->created_at->format('d.m.Y H:i') }}</small></p>
                     </a>
@@ -199,6 +199,10 @@
                 @endforeach
             </div>
         </div>
+        <scroll-to-comment @if(Session::exists('post_id')) :session-post-id="{{ Session::get('post_id') }}" @endif
+        @if(Session::exists('comment_id')) :session-post-id="{{ Session::get('comment_id') }}" @endif
+                           @if(Session::exists('subcomment_id')) :session-post-id="{{ Session::get('subcomment_id') }}" @endif>
+        </scroll-to-comment>
     </div>
     <nav class="mb-5">
         <ul class="pagination pagination justify-content-center">
@@ -216,7 +220,4 @@
         </ul>
     </nav>
     <a href="{{ route('main') }}" type="button" class="btn btn-outline-success">&larr; Home</a>
-    <script>
-
-    </script>
 @endsection

@@ -50,8 +50,6 @@ Route::controller(CommentController::class)->group(function () {
     Route::post('/posts', 'store');
 });
 
-Route::view('/test', 'test_vue');
-
 Route::fallback(function () {
     return redirect()->route('main');
 });

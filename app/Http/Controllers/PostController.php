@@ -59,8 +59,9 @@ class PostController extends Controller
     public function store(StorePostRequest $request): RedirectResponse
     {
         $request['user_id'] = $request->user()->id;
-        Post::create($request->all());
-        $request->session()->flash('post_add', 'Пост успешно создан!');
+        $some = Post::create($request->all());
+        $request->session()->flash('post_add', $some);
+        $request->session()->flash('post_id', 'Пост успешно создан!');
         return redirect()->route('all_user_posts');
     }
 

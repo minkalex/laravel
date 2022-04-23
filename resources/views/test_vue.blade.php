@@ -2,6 +2,6 @@
 
 @section('content')
     <div id="app">
-        <example-component></example-component>
+        <header-component :users="{{ json_encode($objUsers) }}"></header-component>
     </div>
 @endsection

@@ -49,8 +49,16 @@ class CommentController extends Controller
             $parent = Post::find($request->post_id);
         }
 
-        $parent->comments()->save($comment);
+        $result = $parent->comments()->save($comment);
         $request->session()->flash('comment_add', 'Комментарий добавлен!');
+        if ('App\\Models\\Comment' === $result->commentable_type) {
+            $request->session()->flash('post_id', $parent->commentable->id);
+            $request->session()->flash('comment_id', $parent->id);
+            $request->session()->flash('subcomment_id', $result->id);
+        } else {
+            $request->session()->flash('post_id', $parent->id);
+            $request->session()->flash('comment_id', $result->id);
+        }
         return redirect($request->url());
     }
 

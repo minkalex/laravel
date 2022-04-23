@@ -15,11 +15,9 @@
                 </svg>
                 Authors
             </li>
-            @foreach ($objUsers as $objUser)
-                <a href="./user/{{ $objUser->id }}"
-                   class="list-group-item list-group-item-action">{{ $objUser->full_name }}@if($objUser->id === \Illuminate\Support\Facades\Auth::id())
-                        (you) @endif</a>
-            @endforeach
+            <div id="vue-users-menu">
+                <users-menu :users="{{ json_encode($objUsers) }}"></users-menu>
+            </div>
         </div>
         <div class="col-8">
             <div class="alert alert-success" role="alert">
