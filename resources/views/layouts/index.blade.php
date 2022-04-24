@@ -16,7 +16,7 @@
 <div class="content w-100 mb-5">
     <div id="app">
         <public-header
-            :data="{{ json_encode(['user' => Auth::user(), 'routes' => ['main' => route('main'), 'profile' => route('main'), 'logout' => route('logout')]]) }}"></public-header>
+            :data="{{ json_encode(['user' => Auth::user(), 'routes' => ['main' => route('main'), 'profile' => route('profile'), 'logout' => route('logout')]]) }}"></public-header>
     </div>
     @yield('content')
 </div>

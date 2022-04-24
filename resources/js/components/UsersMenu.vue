@@ -1,20 +1,27 @@
 <template>
-    <!--@foreach ($objUsers as $objUser)
-    <a href="./user/{{ $objUser->id }}"
-       class="list-group-item list-group-item-action">{{ $objUser->full_name }}@if($objUser->id === \Illuminate\Support\Facades\Auth::id())
-        (you) @endif</a>
-    @endforeach-->
-    <p>asdasdasdasdasasads</p>
+    <div class="list-group list-group-flush">
+        <a v-for="user in usersList" :href="user.href" class="list-group-item list-group-item-action">{{ user.full_name }}</a>
+    </div>
 </template>
 
 <script>
 export default {
+    data() {
+        return {
+            usersList: this.buildMenu()
+        }
+    },
     props: [
         'users',
     ],
-    mounted() {
-        console.log(this.users)
-        console.log('sdasdasd')
+    methods: {
+        buildMenu() {
+            let list = []
+            this.users.forEach((user) => {
+                list.push({href: './user/' + user.id, full_name: user.last_name + ' ' + user.name})
+            })
+            return list
+        }
     }
 }
 </script>

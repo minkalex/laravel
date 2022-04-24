@@ -3,7 +3,7 @@
 @section('title', 'Authors')
 
 @section('content')
-    <div class="row" style="flex-wrap: unset; ">
+    <div class="row" style="flex-wrap: unset; " id="vue-users-menu">
         <div class="list-group col-4 list-group-flush">
             <li class="list-group-item list-group-item-success" aria-current="true">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -15,9 +15,7 @@
                 </svg>
                 Authors
             </li>
-            <div id="vue-users-menu">
-                <users-menu :users="{{ json_encode($objUsers) }}"></users-menu>
-            </div>
+            <users-menu :users="{{ json_encode($objUsers) }}"></users-menu>
         </div>
         <div class="col-8">
             <div class="alert alert-success" role="alert">
