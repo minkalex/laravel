@@ -29,10 +29,31 @@ Vue.component('users-menu', require('./components/UsersMenu.vue').default);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+//import { createApp } from 'vue'
+//import {createStore, mapActions} from 'vuex'
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+Vue.use(Vuex)
+
+const store = new Vuex.Store({
+    state: {
+        count: 0
+    },
+    mutations: {
+        increment (state) {
+            state.count++
+        }
+    }
+})
+
+// Initialize Vue
 const app = new Vue({
     el: '#app',
+    store: store
 });
 
-const vueUsersMenu = new Vue({
+const app2 = new Vue({
     el: '#vue-users-menu',
+    store: store
 });

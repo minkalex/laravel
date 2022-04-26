@@ -19,7 +19,7 @@
 export default {
     data() {
         return {
-            items: this.buildHeaderMenu()
+            items: this.buildHeaderMenu(),
         }
     },
     props: [
@@ -27,6 +27,8 @@ export default {
     ],
     methods: {
         buildHeaderMenu() {
+            this.$store.commit('increment')
+            console.log(this.$store.state.count)
             if (null !== this.data.user) {
                 return [
                     {href: this.data.routes.profile, title: 'Profile'},
@@ -41,6 +43,7 @@ export default {
             }
         }
     }
+
 }
 </script>
 
