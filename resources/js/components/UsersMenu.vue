@@ -20,7 +20,6 @@ export default {
             this.users.forEach((user) => {
                 list.push({href: './user/' + user.id, full_name: user.last_name + ' ' + user.name})
             })
-            console.log(list)
             return list
         }
     }

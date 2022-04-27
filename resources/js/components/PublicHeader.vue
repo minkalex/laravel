@@ -5,7 +5,7 @@
             <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
         </a>
         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2" style="font-size: 85%">
-            <li v-for="item of items"><a class="dropdown-item" :href="item.href">{{ item.title }}</a></li>
+            <li v-for="item of items" :key="item.id"><a class="dropdown-item" :href="item.href">{{ item.title }}</a></li>
         </ul>
     </div>
     <div v-else class="d-flex justify-content-end">
@@ -16,34 +16,45 @@
 </template>
 
 <script>
+import { mapGetters, mapActions, mapState } from 'vuex'
 export default {
     data() {
         return {
-            items: this.buildHeaderMenu(),
+            items: []
         }
     },
     props: [
         'data',
     ],
+    computed: {
+        ...mapGetters([
+            'getCurrentUser',
+        ]),
+    },
     methods: {
-        buildHeaderMenu() {
-            this.$store.commit('increment')
-            console.log(this.$store.state.count)
-            if (null !== this.data.user) {
-                return [
-                    {href: this.data.routes.profile, title: 'Profile'},
-                    {href: this.data.routes.main + '/users/' + this.data.user.id + '/edit', title: 'Edit'},
-                    {href: this.data.routes.logout, title: 'Sign out'}
-                ]
-            } else {
-                return [
-                    {href: this.data.routes.main + '/login', title: 'Login'},
-                    {href: this.data.routes.main + '/signup', title: 'Sign-up'}
-                ]
-            }
+        ...mapActions([
+            'setNewUser',
+        ]),
+    },
+    mounted() {
+        console.log(this.getCurrentUser)
+        if (this.getCurrentUser.id !== this.data.user.id) {
+            this.setNewUser(this.data.user)
+        }
+        console.log(this.getCurrentUser)
+        if (null !== this.data.user) {
+            this.items = [
+                {href: this.data.routes.profile, title: 'Profile'},
+                {href: this.data.routes.main + '/users/' + this.data.user.id + '/edit', title: 'Edit'},
+                {href: this.data.routes.logout, title: 'Sign out'}
+            ]
+        } else {
+            this.items = [
+                {href: this.data.routes.main + '/login', title: 'Login'},
+                {href: this.data.routes.main + '/signup', title: 'Sign-up'}
+            ]
         }
     }
-
 }
 </script>
 
