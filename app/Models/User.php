@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -18,6 +21,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'last_name',
         'name',
         'email',
         'password',
@@ -41,4 +45,36 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the user's full name.
+     *
+     * @return Attribute
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ucfirst($this->last_name) . ' ' . ucfirst($this->name),
+        );
+    }
+
+    /**
+     * The chats that belong to the user.
+     *
+     * @return BelongsToMany
+     */
+    public function chats(): BelongsToMany
+    {
+        return $this->belongsToMany(Chat::class);
+    }
+
+    /**
+     * Get the user messages.
+     *
+     * @return HasMany
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
 }
