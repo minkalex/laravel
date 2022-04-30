@@ -15,22 +15,20 @@ use App\Http\Controllers\UserController;
 |
 */
 
-Route::resource('users', UserController::class)->only([
-    'edit', 'update'
-]);
+Route::resource('users', UserController::class);
 
 Route::controller(UserController::class)->group(function () {
     Route::get('/login', 'showLoginForm')->name('login');
     Route::post('/login', 'authenticate');
     Route::get('/signup', 'create');
     Route::post('/signup', 'store')->middleware('pass_match');
-    Route::get('/', 'index')->name('main');
+    //Route::get('/', 'index')->name('main');
     Route::get('/profile', 'show')->name('profile');
     Route::get('/logout', 'logout')->name('logout');
 });
 
-Route::get('/chat', [ChatController::class, 'index']);
+Route::get('/chat', [ChatController::class, 'index']) ;
 
-Route::fallback(function () {
+/*Route::fallback(function () {
     return redirect()->route('main');
-});
+});*/

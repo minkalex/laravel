@@ -1,6 +1,6 @@
 @extends('layouts.index')
 
-@section('title', 'Authors')
+@section('title', 'Welcome')
 
 @section('content')
     <div class="row" style="flex-wrap: unset; ">

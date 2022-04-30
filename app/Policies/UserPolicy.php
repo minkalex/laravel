@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Auth;
 
 class UserPolicy
 {
@@ -17,7 +18,7 @@ class UserPolicy
      */
     public function viewAny(User $user)
     {
-        return false;
+        return Auth::check();
     }
 
     /**

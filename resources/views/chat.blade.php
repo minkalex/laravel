@@ -5,9 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="{{ asset('js/app.js') }}" defer></script>
+
+    <!-- Styles -->
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <title>Chat</title>
 </head>
@@ -15,11 +16,6 @@
 
 <div class="row" style="flex-wrap: unset; margin: unset;" id="vue-users-menu">
     <div class="list-group col-4 list-group-flush" style="padding: unset">
-
-        <div id="app">
-            <create-chat-button></create-chat-button>
-        </div>
-
         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
             <symbol id="pencil" fill="currentColor" viewBox="0 0 16 16">
                 <path
@@ -28,73 +24,8 @@
                       d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
             </symbol>
         </svg>
-        <div class="btn-group">
-            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown"
-                    aria-expanded="false" data-bs-auto-close="outside">
-                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img">
-                    <use xlink:href="#pencil"/>
-                </svg>
-                new chat
-            </button>
-            <ul class="dropdown-menu">
-                <div class="accordion accordion-flush" id="accordionExample">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingOne">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                step #1
-                            </button>
-                        </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-                             data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                <ul class="list-group list-group-flush">
-                                    @foreach($users as $user)
-                                        @if ($user->id !== Auth::user()->id)
-                                            <li class="list-group-item"><input class="form-check-input me-1"
-                                                                               type="checkbox" value="">
-                                                {{ $user->full_name }}</li>
-                                        @endif
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingTwo">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                step #2
-                            </button>
-                        </h2>
-                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                             data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                <div class="form-floating mb-3">
-                                    <input type="text" class="form-control" id="chat-title" name="chat-title"
-                                           placeholder="chat title">
-                                    <label for="chat-title">chat title</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingThree">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                step #3
-                            </button>
-                        </h2>
-                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
-                             data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                <button type="button" class="btn btn-link text-decoration-none link-success">create
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </ul>
+        <div id="app">
+            <create-chat-button></create-chat-button>
         </div>
         <div class="list-group list-group-flush" id="list-tab" role="tablist">
             @foreach($chats as $chat)
@@ -135,8 +66,5 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-        crossorigin="anonymous"></script>
 </body>
 </html>
