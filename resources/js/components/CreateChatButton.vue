@@ -70,20 +70,31 @@
 </template>
 
 <script>
+import { mapGetters, mapActions, mapState } from 'vuex'
+
 export default {
+    data() {
+        return {
+            arUsers: {}
+        }
+    },
+    computed: {
+        ...mapGetters([
+            'getUsers'
+        ]),
+        ...mapState([
+             'users'
+         ])
+    },
+    methods: {
+        ...mapActions([
+            'setActualUsers',
+        ]),
+    },
     mounted() {
-        axios.get('./users', {headers: {'X-Requested-With': 'Axios'}})
-            .then(function (response) {
-                // handle success
-                console.log(response.data);
-            })
-            .catch(function (error) {
-                // handle error
-                //console.log(error);
-            })
-            .then(function () {
-                // always executed
-            });
+        this.setActualUsers()
+        console.log(this.users)
+        console.log(this.getUsers)
     }
 }
 </script>
