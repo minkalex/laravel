@@ -7,21 +7,28 @@ use App\Http\Requests\UpdateChatRequest;
 use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ChatController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return View
+     * @return
      */
-    public function index(): View
+    public function index(Request $request)
     {
-        $chats = Auth::user()->chats;
-        $users = User::all();
-        return view('chat')
-            ->with(compact('chats', 'users'));
+        if ($request->hasHeader('X-Requested-With')) {
+            return Auth::user()->chats;
+        } else {
+            $chats = Auth::user()->chats;
+            $users = User::all();
+            return view('chat')
+                ->with(compact('chats', 'users'));
+        }
     }
 
     /**
@@ -37,12 +44,23 @@ class ChatController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreChatRequest  $request
-     * @return \Illuminate\Http\Response
+     * @param  StoreChatRequest  $request
+     * @return
      */
     public function store(StoreChatRequest $request)
     {
-        //
+        $result = Chat::create(['title' => 'asd', 'created_by' => 1]);
+        return $result;
+        /*if (empty($request->title)) {
+            $lastChatId = Chat::all()->last()->id;
+            $request->title = 'chat #' . $lastChatId + 1;
+        }
+        $result = Chat::create($request->except(['usersId']));
+        $arData = [];
+        foreach ($request->usersId as $userId) {
+            $arData[] = ['user_id'=> $userId, 'chat_id' => $result['id']];
+        }
+        DB::table('chat_user')->insert($arData);*/
     }
 
     /**

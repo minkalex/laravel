@@ -13,18 +13,20 @@ class StoreChatRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, mixed>
+     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            //
+            'title' => 'max:100',
+            'created_by' => 'required|integer',
+            'usersId' => 'required|array',
         ];
     }
 }

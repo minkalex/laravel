@@ -5450,15 +5450,35 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      arUsers: {}
+      'checkedUsers': [],
+      'chatTitle': ''
     };
   },
-  computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)(['getUsers'])), (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['users'])),
-  methods: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['setActualUsers'])),
+  props: ['UserFromBlade'],
+  computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)(['users', 'currentUser', 'chats'])), {}, {
+    otherUsers: function otherUsers() {
+      var currentUserId = this.currentUser.id;
+      return this.users.filter(function (user) {
+        return user.id !== currentUserId;
+      });
+    }
+  }),
+  methods: _objectSpread(_objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['getUsersFromDb', 'getCurrentUserFromDb', 'getChatsFromDb', 'updateChats'])), (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapMutations)(['addChat'])), {}, {
+    fullName: function fullName(objUser) {
+      return objUser.last_name + ' ' + objUser.name;
+    },
+    submit: function submit() {
+      this.updateChats({
+        'usersId': this.checkedUsers,
+        'title': this.chatTitle,
+        'created_by': this.currentUser.id
+      }); //console.log(this.chats)
+    }
+  }),
   mounted: function mounted() {
-    this.setActualUsers();
-    console.log(this.users);
-    console.log(this.getUsers);
+    this.getUsersFromDb();
+    this.getCurrentUserFromDb(this.UserFromBlade.id);
+    this.getChatsFromDb();
   }
 });
 
@@ -5486,6 +5506,9 @@ vue__WEBPACK_IMPORTED_MODULE_0__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_2_
 
 var axios = (__webpack_require__(/*! axios */ "./node_modules/axios/index.js")["default"]);
 
+axios.defaults.headers.common = {
+  "X-Requested-With": "Axios"
+};
 var app = new vue__WEBPACK_IMPORTED_MODULE_0__["default"]({
   el: '#app',
   store: _store__WEBPACK_IMPORTED_MODULE_1__["default"]
@@ -5566,58 +5589,58 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   state: {
-    users1: []
+    users: [],
+    currentUser: {},
+    chatList: []
   },
   mutations: {
-    setUsers: function setUsers(state, objUser) {
-      state.users = objUser;
+    addChat: function addChat(state, objChat) {
+      state.chatList.unshift(objChat);
     }
   },
   getters: {
-    getUsers: function getUsers(state) {
+    users: function users(state) {
       return state.users;
+    },
+    currentUser: function currentUser(state) {
+      return state.currentUser;
+    },
+    chats: function chats(state) {
+      return state.chatList;
     }
   },
   actions: {
-    getActualUsers: function getActualUsers() {
-      return new Promise(function (resolve, reject) {
-        axios__WEBPACK_IMPORTED_MODULE_0___default().get('./users', {
-          headers: {
-            'X-Requested-With': 'Axios'
-          }
-        }).then(function (response) {
-          resolve(response.data);
-        })["catch"](function (error) {
-          reject(error);
-        }).then(function () {//NOP
-        });
+    getUsersFromDb: function getUsersFromDb(_ref) {
+      var state = _ref.state;
+      axios.get('./users').then(function (_ref2) {
+        var data = _ref2.data;
+        state.users = data;
       });
     },
-    setActualUsers: function setActualUsers(_ref) {
-      var dispatch = _ref.dispatch,
-          commit = _ref.commit;
-      return dispatch('getActualUsers').then(function (val) {
-        commit('setUsers', val);
+    getCurrentUserFromDb: function getCurrentUserFromDb(_ref3, userId) {
+      var state = _ref3.state;
+      axios.get('./users/' + userId).then(function (_ref4) {
+        var data = _ref4.data;
+        state.currentUser = data;
+      });
+    },
+    updateChats: function updateChats(context, objNewChat) {
+      console.log(objNewChat);
+      axios.post('./chats', objNewChat).then(function (response) {
+        console.log(response); //this.getChatsFromDb
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    getChatsFromDb: function getChatsFromDb(_ref5) {
+      var state = _ref5.state;
+      axios.get('./chats').then(function (_ref6) {
+        var data = _ref6.data;
+        state.chatList = data;
       });
     }
-    /*setActualUsers(context) {
-        axios.get('./users', {headers: {'X-Requested-With': 'Axios'}})
-            .then(function (response) {
-                context.commit('setUsers', response.data);
-            })
-            .catch(function (error) {
-                console.log(error);
-            })
-            .then(function () {
-                //NOP
-            });
-    }*/
-
   }
 });
 
@@ -27862,10 +27885,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 /***/ }),
 
-/***/ "./resources/css/app.css":
-/*!*******************************!*\
-  !*** ./resources/css/app.css ***!
-  \*******************************/
+/***/ "./resources/sass/app.scss":
+/*!*********************************!*\
+  !*** ./resources/sass/app.scss ***!
+  \*********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -28182,15 +28205,7 @@ var render = function () {
       ]
     ),
     _vm._v(" "),
-    _vm._m(0),
-  ])
-}
-var staticRenderFns = [
-  function () {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("ul", { staticClass: "dropdown-menu" }, [
+    _c("ul", { staticClass: "dropdown-menu" }, [
       _c(
         "div",
         {
@@ -28198,160 +28213,263 @@ var staticRenderFns = [
           attrs: { id: "accordionExample" },
         },
         [
-          _c("div", { staticClass: "accordion-item" }, [
-            _c(
-              "h2",
-              { staticClass: "accordion-header", attrs: { id: "headingOne" } },
-              [
+          _c(
+            "form",
+            {
+              on: {
+                submit: function ($event) {
+                  $event.preventDefault()
+                  return _vm.submit.apply(null, arguments)
+                },
+              },
+            },
+            [
+              _c("div", { staticClass: "accordion-item" }, [
+                _vm._m(0),
+                _vm._v(" "),
                 _c(
-                  "button",
+                  "div",
                   {
-                    staticClass: "accordion-button",
+                    staticClass: "accordion-collapse collapse show",
                     attrs: {
-                      type: "button",
-                      "data-bs-toggle": "collapse",
-                      "data-bs-target": "#collapseOne",
-                      "aria-expanded": "true",
-                      "aria-controls": "collapseOne",
+                      id: "collapseOne",
+                      "aria-labelledby": "headingOne",
+                      "data-bs-parent": "#accordionExample",
                     },
                   },
                   [
-                    _vm._v(
-                      "\n                        step #1\n                    "
-                    ),
-                  ]
-                ),
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "accordion-collapse collapse show",
-                attrs: {
-                  id: "collapseOne",
-                  "aria-labelledby": "headingOne",
-                  "data-bs-parent": "#accordionExample",
-                },
-              },
-              [
-                _c("div", { staticClass: "accordion-body" }, [
-                  _c("ul", { staticClass: "list-group list-group-flush" }),
-                ]),
-              ]
-            ),
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "accordion-item" }, [
-            _c(
-              "h2",
-              { staticClass: "accordion-header", attrs: { id: "headingTwo" } },
-              [
-                _c(
-                  "button",
-                  {
-                    staticClass: "accordion-button collapsed",
-                    attrs: {
-                      type: "button",
-                      "data-bs-toggle": "collapse",
-                      "data-bs-target": "#collapseTwo",
-                      "aria-expanded": "false",
-                      "aria-controls": "collapseTwo",
-                    },
-                  },
-                  [
-                    _vm._v(
-                      "\n                        step #2\n                    "
-                    ),
-                  ]
-                ),
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "accordion-collapse collapse",
-                attrs: {
-                  id: "collapseTwo",
-                  "aria-labelledby": "headingTwo",
-                  "data-bs-parent": "#accordionExample",
-                },
-              },
-              [
-                _c("div", { staticClass: "accordion-body" }, [
-                  _c("div", { staticClass: "form-floating mb-3" }, [
-                    _c("input", {
-                      staticClass: "form-control",
-                      attrs: {
-                        type: "text",
-                        id: "chat-title",
-                        name: "chat-title",
-                        placeholder: "chat title",
-                      },
-                    }),
-                    _vm._v(" "),
-                    _c("label", { attrs: { for: "chat-title" } }, [
-                      _vm._v("chat title"),
+                    _c("div", { staticClass: "accordion-body" }, [
+                      _c(
+                        "ul",
+                        { staticClass: "list-group list-group-flush" },
+                        _vm._l(_vm.otherUsers, function (obUser) {
+                          return _c(
+                            "li",
+                            { key: obUser.id, staticClass: "list-group-item" },
+                            [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.checkedUsers,
+                                    expression: "checkedUsers",
+                                  },
+                                ],
+                                staticClass: "form-check-input me-1",
+                                attrs: { type: "checkbox", name: obUser.id },
+                                domProps: {
+                                  value: obUser.id,
+                                  checked: Array.isArray(_vm.checkedUsers)
+                                    ? _vm._i(_vm.checkedUsers, obUser.id) > -1
+                                    : _vm.checkedUsers,
+                                },
+                                on: {
+                                  change: function ($event) {
+                                    var $$a = _vm.checkedUsers,
+                                      $$el = $event.target,
+                                      $$c = $$el.checked ? true : false
+                                    if (Array.isArray($$a)) {
+                                      var $$v = obUser.id,
+                                        $$i = _vm._i($$a, $$v)
+                                      if ($$el.checked) {
+                                        $$i < 0 &&
+                                          (_vm.checkedUsers = $$a.concat([$$v]))
+                                      } else {
+                                        $$i > -1 &&
+                                          (_vm.checkedUsers = $$a
+                                            .slice(0, $$i)
+                                            .concat($$a.slice($$i + 1)))
+                                      }
+                                    } else {
+                                      _vm.checkedUsers = $$c
+                                    }
+                                  },
+                                },
+                              }),
+                              _vm._v(
+                                "\n                                    " +
+                                  _vm._s(_vm.fullName(obUser)) +
+                                  "\n                                "
+                              ),
+                            ]
+                          )
+                        }),
+                        0
+                      ),
                     ]),
-                  ]),
-                ]),
-              ]
-            ),
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "accordion-item" }, [
-            _c(
-              "h2",
-              {
-                staticClass: "accordion-header",
-                attrs: { id: "headingThree" },
-              },
-              [
+                  ]
+                ),
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "accordion-item" }, [
+                _vm._m(1),
+                _vm._v(" "),
                 _c(
-                  "button",
+                  "div",
                   {
-                    staticClass: "accordion-button collapsed",
+                    staticClass: "accordion-collapse collapse",
                     attrs: {
-                      type: "button",
-                      "data-bs-toggle": "collapse",
-                      "data-bs-target": "#collapseThree",
-                      "aria-expanded": "false",
-                      "aria-controls": "collapseThree",
+                      id: "collapseTwo",
+                      "aria-labelledby": "headingTwo",
+                      "data-bs-parent": "#accordionExample",
                     },
                   },
                   [
-                    _vm._v(
-                      "\n                        step #3\n                    "
-                    ),
+                    _c("div", { staticClass: "accordion-body" }, [
+                      _c("div", { staticClass: "form-floating mb-3" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.chatTitle,
+                              expression: "chatTitle",
+                            },
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            id: "chat-title",
+                            name: "chat-title",
+                            placeholder: "chat title",
+                          },
+                          domProps: { value: _vm.chatTitle },
+                          on: {
+                            input: function ($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.chatTitle = $event.target.value
+                            },
+                          },
+                        }),
+                        _vm._v(" "),
+                        _c("label", { attrs: { for: "chat-title" } }, [
+                          _vm._v("chat title"),
+                        ]),
+                      ]),
+                    ]),
                   ]
                 ),
-              ]
+              ]),
+              _vm._v(" "),
+              _vm._m(2),
+            ]
+          ),
+        ]
+      ),
+    ]),
+  ])
+}
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "h2",
+      { staticClass: "accordion-header", attrs: { id: "headingOne" } },
+      [
+        _c(
+          "button",
+          {
+            staticClass: "accordion-button",
+            attrs: {
+              type: "button",
+              "data-bs-toggle": "collapse",
+              "data-bs-target": "#collapseOne",
+              "aria-expanded": "true",
+              "aria-controls": "collapseOne",
+            },
+          },
+          [
+            _vm._v(
+              "\n                            step #1\n                        "
             ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "accordion-collapse collapse",
-                attrs: {
-                  id: "collapseThree",
-                  "aria-labelledby": "headingThree",
-                  "data-bs-parent": "#accordionExample",
-                },
+          ]
+        ),
+      ]
+    )
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "h2",
+      { staticClass: "accordion-header", attrs: { id: "headingTwo" } },
+      [
+        _c(
+          "button",
+          {
+            staticClass: "accordion-button collapsed",
+            attrs: {
+              type: "button",
+              "data-bs-toggle": "collapse",
+              "data-bs-target": "#collapseTwo",
+              "aria-expanded": "false",
+              "aria-controls": "collapseTwo",
+            },
+          },
+          [
+            _vm._v(
+              "\n                            step #2\n                        "
+            ),
+          ]
+        ),
+      ]
+    )
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "accordion-item" }, [
+      _c(
+        "h2",
+        { staticClass: "accordion-header", attrs: { id: "headingThree" } },
+        [
+          _c(
+            "button",
+            {
+              staticClass: "accordion-button collapsed",
+              attrs: {
+                type: "button",
+                "data-bs-toggle": "collapse",
+                "data-bs-target": "#collapseThree",
+                "aria-expanded": "false",
+                "aria-controls": "collapseThree",
               },
-              [
-                _c("div", { staticClass: "accordion-body" }, [
-                  _c(
-                    "button",
-                    {
-                      staticClass:
-                        "btn btn-link text-decoration-none link-success",
-                      attrs: { type: "button" },
-                    },
-                    [_vm._v("create\n                        ")]
-                  ),
-                ]),
-              ]
+            },
+            [
+              _vm._v(
+                "\n                            step #3\n                        "
+              ),
+            ]
+          ),
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "accordion-collapse collapse",
+          attrs: {
+            id: "collapseThree",
+            "aria-labelledby": "headingThree",
+            "data-bs-parent": "#accordionExample",
+          },
+        },
+        [
+          _c("div", { staticClass: "accordion-body" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-link text-decoration-none link-success",
+                attrs: { type: "submit" },
+              },
+              [_vm._v("create\n                            ")]
             ),
           ]),
         ]
@@ -41853,18 +41971,6 @@ var index = {
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -41974,7 +42080,7 @@ var index = {
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
 /******/ 	__webpack_require__.O(undefined, ["css/app"], () => (__webpack_require__("./resources/js/app.js")))
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/app"], () => (__webpack_require__("./resources/css/app.css")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/app"], () => (__webpack_require__("./resources/sass/app.scss")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

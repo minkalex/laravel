@@ -54,11 +54,15 @@ class UserController extends Controller
 
     /**
      * @param  User  $user
-     * @return View
+     * @return View|User
      */
-    public function show(User $user): View
+    public function show(User $user, Request $request): View|User
     {
-        return view('admin.profile_info');
+        if ($request->hasHeader('X-Requested-With')) {
+            return $user;
+        } else {
+            return view('admin.profile_info');
+        }
     }
 
     /**

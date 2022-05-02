@@ -16,6 +16,7 @@ use App\Http\Controllers\UserController;
 */
 
 Route::resource('users', UserController::class);
+Route::resource('chats', ChatController::class);
 
 Route::controller(UserController::class)->group(function () {
     Route::get('/login', 'showLoginForm')->name('login');

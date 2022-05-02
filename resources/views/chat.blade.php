@@ -25,7 +25,7 @@
             </symbol>
         </svg>
         <div id="app">
-            <create-chat-button></create-chat-button>
+            <create-chat-button :user-from-blade="{{ Auth::user() }}"></create-chat-button>
         </div>
         <div class="list-group list-group-flush" id="list-tab" role="tablist">
             @foreach($chats as $chat)

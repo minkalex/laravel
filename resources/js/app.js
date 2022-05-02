@@ -9,6 +9,9 @@ import Vuex from 'vuex'
 import store from './store'
 Vue.use(Vuex)
 const axios = require('axios').default;
+axios.defaults.headers.common = {
+    "X-Requested-With": "Axios",
+};
 
 const app = new Vue({
     el: '#app',
