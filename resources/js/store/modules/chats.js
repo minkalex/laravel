@@ -2,6 +2,7 @@ export default {
     state: {
         users: [],
         currentUser: {},
+        chatsIsLoading: false,
         chatList: []
     },
     mutations: {
@@ -10,16 +11,12 @@ export default {
         }
     },
     getters: {
-        users(state) {
-            return state.users;
-        },
-        currentUser(state) {
-            return state.currentUser;
-        },
-        chats(state) {
-            return state.chatList;
-        },
+        users: state => state.users,
+        currentUser: state => state.currentUser,
+        chats: state => state.chatList,
+        chatsIsLoading: state => state.chatsIsLoading,
     },
+
     actions: {
         getUsersFromDb ({state}) {
             axios.get('./users')
@@ -33,22 +30,28 @@ export default {
                     state.currentUser = data
                 })
         },
-        updateChats (context, objNewChat) {
-            console.log(objNewChat)
-            axios.post('./chats', objNewChat)
-            .then(function (response) {
-                console.log(response);
-                //this.getChatsFromDb
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-        },
+
+        /*addGetChat({dispatch}, data) {
+            if (data !== undefined) {
+                return dispatch('addChatToDb', data);
+            }
+
+            return dispatch('getChatsFromDb');
+        },*/
+
         getChatsFromDb ({state}) {
-            axios.get('./chats')
+            state.chatsIsLoading = true;
+            return axios.get('./chats')
                 .then(({data}) => {
                     state.chatList = data
                 })
+                .finally(() => {
+                    state.chatsIsLoading = false;
+                });
         },
+
+        addChatToDb({actions}, objNewChat) {
+            return axios.post('./chats', objNewChat);
+        }
     }
 }

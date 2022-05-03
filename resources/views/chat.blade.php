@@ -25,18 +25,7 @@
             </symbol>
         </svg>
         <div id="app">
-            <create-chat-button :user-from-blade="{{ Auth::user() }}"></create-chat-button>
-        </div>
-        <div class="list-group list-group-flush" id="list-tab" role="tablist">
-            @foreach($chats as $chat)
-                <a class="list-group-item list-group-item-action d-flex justify-content-between" id="list-home-list"
-                   data-bs-toggle="list"
-                   href="#list-chat-{{ $chat->id }}" role="tab"
-                   aria-controls="list-chat-{{ $chat->id }}">
-                    {{ $chat->title }}
-                    <span class="badge bg-primary rounded-pill">14</span>
-                </a>
-            @endforeach
+            <chat-list :user-from-blade="{{ Auth::user() }}"></chat-list>
         </div>
     </div>
     <div class="col-8" style="padding: unset">

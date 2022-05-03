@@ -12,6 +12,13 @@ class Chat extends Model
     use HasFactory;
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = ['title', 'created_by'];
+
+    /**
      * The users that belong to the chat.
      *
      * @return BelongsToMany

@@ -3,6 +3,7 @@ require('./bootstrap');
 window.Vue = require('vue').default;
 
 Vue.component('create-chat-button', require('./components/CreateChatButton.vue').default);
+Vue.component('chat-list', require('./components/ChatList.vue').default);
 
 import Vue from 'vue'
 import Vuex from 'vuex'

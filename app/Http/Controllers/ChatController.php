@@ -49,18 +49,27 @@ class ChatController extends Controller
      */
     public function store(StoreChatRequest $request)
     {
-        $result = Chat::create(['title' => 'asd', 'created_by' => 1]);
-        return $result;
-        /*if (empty($request->title)) {
+        if (empty($request->title)) {
             $lastChatId = Chat::all()->last()->id;
-            $request->title = 'chat #' . $lastChatId + 1;
+            $request->title = 'chat #'.$lastChatId + 1;
         }
         $result = Chat::create($request->except(['usersId']));
         $arData = [];
         foreach ($request->usersId as $userId) {
-            $arData[] = ['user_id'=> $userId, 'chat_id' => $result['id']];
+            $arData[] = [
+                'user_id' => $userId,
+                'chat_id' => $result['id'],
+                'created_at' => date('c'),
+                'updated_at' => date('c')
+            ];
         }
-        DB::table('chat_user')->insert($arData);*/
+        $arData[] = [
+            'user_id' => $request->created_by,
+            'chat_id' => $result['id'],
+            'created_at' => date('c'),
+            'updated_at' => date('c')
+        ];
+        DB::table('chat_user')->insert($arData);
     }
 
     /**
