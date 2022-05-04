@@ -3,7 +3,10 @@ export default {
         users: [],
         currentUser: {},
         chatsIsLoading: false,
-        chatList: []
+        messagesIsLoading: false,
+        chatList: [],
+        messagesList: [],
+        activeChat: {}
     },
     mutations: {
         addChat(state, objChat) {
@@ -14,7 +17,10 @@ export default {
         users: state => state.users,
         currentUser: state => state.currentUser,
         chats: state => state.chatList,
+        messages: state => state.messagesList,
         chatsIsLoading: state => state.chatsIsLoading,
+        messagesIsLoading: state => state.messagesIsLoading,
+        activeChat: state => state.activeChat,
     },
 
     actions: {
@@ -52,6 +58,26 @@ export default {
 
         addChatToDb({actions}, objNewChat) {
             return axios.post('./chats', objNewChat);
-        }
+        },
+
+        getMessagesFromDb ({state}) {
+            if (Object.keys(state.activeChat).length > 0) {
+                state.messagesIsLoading = true;
+                return axios.get('./messages?chat_id=' + state.activeChat.id)
+                    .then(({data}) => {
+                        state.messagesList = data
+                    })
+                    .finally(() => {
+                        state.messagesIsLoading = false;
+                    });
+            }
+        },
+
+        addMessageToDb({actions}, objNewMessage) {
+            return axios.post('./messages', objNewMessage);
+        },
+        updateActiveChat ({state}, objChat) {
+            state.activeChat = objChat
+        },
     }
 }

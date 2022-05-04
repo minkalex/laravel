@@ -16,7 +16,10 @@ class Chat extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['title', 'created_by'];
+    protected $fillable = [
+        'title',
+        'created_by',
+    ];
 
     /**
      * The users that belong to the chat.

@@ -11,6 +11,17 @@ class Message extends Model
     use HasFactory;
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'text',
+        'user_id',
+        'chat_id',
+    ];
+
+    /**
      * Get the user that owns the message.
      *
      * @return BelongsTo

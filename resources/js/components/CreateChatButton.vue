@@ -95,7 +95,10 @@ export default {
     },
     methods: {
         ...mapActions([
-            'getUsersFromDb', 'getCurrentUserFromDb', 'addChatToDb', 'getChatsFromDb'
+            'getUsersFromDb',
+            'getCurrentUserFromDb',
+            'addChatToDb',
+            'getChatsFromDb',
         ]),
         fullName(objUser) {
             return objUser.last_name + ' ' + objUser.name

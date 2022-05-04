@@ -11,20 +11,20 @@ class StoreMessageRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, mixed>
+     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            //
+            'text' => 'required|max:1000',
         ];
     }
 }

@@ -4,18 +4,35 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
+use App\Models\Chat;
 use App\Models\Message;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if ($request->hasHeader('X-Requested-With')) {
+            $arrMessages = Chat::find($request->chat_id)->messages;
+            $arrUsers = User::all();
+            foreach ($arrMessages as $index => $arrMessage) {
+                foreach ($arrUsers as $arrUser) {
+                    if ($arrUser->id === $arrMessage->user_id) {
+                        $arrMessages[$index]['user_fullname'] = $arrUser->full_name;
+                    }
+                }
+                $arrMessages[$index]['formatted_date'] = date('d.m.Y H:i', strtotime($arrMessage['created_at']));
+            }
+            return $arrMessages;
+        }
     }
 
     /**
@@ -31,12 +48,12 @@ class MessageController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreMessageRequest  $request
-     * @return \Illuminate\Http\Response
+     * @param  StoreMessageRequest  $request
+     * @return void
      */
-    public function store(StoreMessageRequest $request)
+    public function store(StoreMessageRequest $request): void
     {
-        //
+        Message::create($request->all());
     }
 
     /**

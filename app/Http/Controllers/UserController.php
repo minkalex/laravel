@@ -20,7 +20,7 @@ class UserController extends Controller
         if ($request->hasHeader('X-Requested-With')) {
             return User::all();
         } else {
-            return $request->headers;
+            return view('authors');
         }
     }
 

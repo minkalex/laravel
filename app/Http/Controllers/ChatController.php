@@ -8,6 +8,7 @@ use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ class ChatController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return
+     * @param  Request  $request
      */
     public function index(Request $request)
     {
@@ -45,9 +46,9 @@ class ChatController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreChatRequest  $request
-     * @return
+     * @return void
      */
-    public function store(StoreChatRequest $request)
+    public function store(StoreChatRequest $request): void
     {
         if (empty($request->title)) {
             $lastChatId = Chat::all()->last()->id;
