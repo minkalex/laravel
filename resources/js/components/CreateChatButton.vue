@@ -1,6 +1,6 @@
 <template>
     <div class="btn-group w-100">
-            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown"
+            <button type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown"
                     aria-expanded="false" data-bs-auto-close="outside">
                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img">
                     <use xlink:href="#pencil"/>
@@ -58,7 +58,7 @@
                             <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
                                  data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    <button type="submit" class="btn btn-link text-decoration-none link-success">create
+                                    <button type="submit" class="btn btn-link text-decoration-none link-dark">create
                                     </button>
                                 </div>
                             </div>

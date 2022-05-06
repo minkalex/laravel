@@ -24,32 +24,37 @@ export default {
     },
 
     actions: {
-        getUsersFromDb ({state}) {
+        getUsersFromDb({state}) {
             axios.get('./users')
                 .then(({data}) => {
                     state.users = data
                 })
         },
-        getCurrentUserFromDb ({state}, userId) {
+        getCurrentUserFromDb({state}, userId) {
             axios.get('./users/' + userId)
                 .then(({data}) => {
                     state.currentUser = data
                 })
         },
 
-        /*addGetChat({dispatch}, data) {
-            if (data !== undefined) {
-                return dispatch('addChatToDb', data);
-            }
-
-            return dispatch('getChatsFromDb');
-        },*/
-
-        getChatsFromDb ({state}) {
+        getChatsFromDb({state}) {
             state.chatsIsLoading = true;
             return axios.get('./chats')
                 .then(({data}) => {
-                    state.chatList = data
+                    let chats = data
+                    data.forEach(function (chat, index) {
+                        if (0 === chat.title.length) {
+                            return axios.get('./chats/' + chat.id + '/participants')
+                                .then(({data}) => {
+                                    let foundUser = data.filter(function (user) {
+                                        return user.id !== state.currentUser.id
+                                    })
+                                    chats[index].title = foundUser[0].last_name + ' ' + foundUser[0].name
+                                    chats[index].edited = true
+                                })
+                        }
+                    })
+                    state.chatList = chats
                 })
                 .finally(() => {
                     state.chatsIsLoading = false;
@@ -57,10 +62,13 @@ export default {
         },
 
         addChatToDb({actions}, objNewChat) {
-            return axios.post('./chats', objNewChat);
+            return axios.post('./chats', objNewChat)
+                .then(({data}) => {
+                    console.log(data)
+                });
         },
 
-        getMessagesFromDb ({state}) {
+        getMessagesFromDb({state}) {
             if (Object.keys(state.activeChat).length > 0) {
                 state.messagesIsLoading = true;
                 return axios.get('./messages?chat_id=' + state.activeChat.id)
@@ -74,10 +82,19 @@ export default {
         },
 
         addMessageToDb({actions}, objNewMessage) {
-            return axios.post('./messages', objNewMessage);
+            return axios.post('./messages', objNewMessage)
         },
-        updateActiveChat ({state}, objChat) {
+
+        updateActiveChat({state}, objChat) {
             state.activeChat = objChat
+        },
+
+        updateMessageInDb({state}, objMessage) {
+            return axios.patch('./messages/' + objMessage.id, {text: objMessage.text});
+        },
+
+        deleteMessageFromDb({state}, messageId) {
+            return axios.delete('./messages/' + messageId);
         },
     }
 }

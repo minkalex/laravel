@@ -26,7 +26,7 @@ class StoreChatRequest extends FormRequest
         return [
             'title' => 'max:100',
             'created_by' => 'required|integer',
-            'usersId' => 'required|array',
+            'usersId' => 'required|array|min:1',
         ];
     }
 }

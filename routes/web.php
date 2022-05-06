@@ -30,8 +30,9 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/logout', 'logout')->name('logout');
 });
 
-Route::get('/chat', [ChatController::class, 'index']) ;
-Route::get('/messages?chat_id={chat_id}', [MessageController::class, 'index']) ;
+Route::get('/chats/{chat}/participants', [ChatController::class, 'getParticipants']);
+Route::get('/chat', [ChatController::class, 'index']);
+Route::get('/messages?chat_id={chat_id}', [MessageController::class, 'index']);
 
 /*Route::fallback(function () {
     return redirect()->route('main');

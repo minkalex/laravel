@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateMessageRequest;
 use App\Models\Chat;
 use App\Models\Message;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -30,9 +29,18 @@ class MessageController extends Controller
                     }
                 }
                 $arrMessages[$index]['formatted_date'] = date('d.m.Y H:i', strtotime($arrMessage['created_at']));
+                if (null !== $arrMessage->replied_to) {
+                    foreach ($arrMessages as $message) {
+                        if ($arrMessage->replied_to === $message->id) {
+                            $arrMessages[$index]['replied_text'] = $message->text;
+                            $arrMessages[$index]['replied_author'] = $message->text;
+                        }
+                    }
+                }
             }
             return $arrMessages;
         }
+        return [];
     }
 
     /**
@@ -49,9 +57,9 @@ class MessageController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreMessageRequest  $request
-     * @return void
+     * @return
      */
-    public function store(StoreMessageRequest $request): void
+    public function store(StoreMessageRequest $request)
     {
         Message::create($request->all());
     }
@@ -59,7 +67,7 @@ class MessageController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Message  $message
+     * @param  Message  $message
      * @return \Illuminate\Http\Response
      */
     public function show(Message $message)
@@ -70,7 +78,7 @@ class MessageController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Message  $message
+     * @param  Message  $message
      * @return \Illuminate\Http\Response
      */
     public function edit(Message $message)
@@ -81,23 +89,24 @@ class MessageController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateMessageRequest  $request
-     * @param  \App\Models\Message  $message
-     * @return \Illuminate\Http\Response
+     * @param  UpdateMessageRequest  $request
+     * @param  Message  $message
+     * @return void
      */
-    public function update(UpdateMessageRequest $request, Message $message)
+    public function update(UpdateMessageRequest $request, Message $message): void
     {
-        //
+        $message->text = $request->text;
+        $message->save();
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Message  $message
-     * @return \Illuminate\Http\Response
+     * @param  Message  $message
+     * @return void
      */
-    public function destroy(Message $message)
+    public function destroy(Message $message): void
     {
-        //
+        $message->delete();
     }
 }

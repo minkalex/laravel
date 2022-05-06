@@ -19,6 +19,7 @@ class Message extends Model
         'text',
         'user_id',
         'chat_id',
+        'replied_to',
     ];
 
     /**

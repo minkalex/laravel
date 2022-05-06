@@ -5410,12 +5410,92 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['UserFromBlade'],
-  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_2__.mapGetters)(['chats', 'chatsIsLoading', 'activeChat'])),
+  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_2__.mapGetters)(['chats', 'chatsIsLoading', 'activeChat', 'currentUser', 'users'])),
   components: {
     MessagesList: _MessagesList__WEBPACK_IMPORTED_MODULE_1__["default"],
     CreateChatButton: _CreateChatButton__WEBPACK_IMPORTED_MODULE_0__["default"]
@@ -5431,7 +5511,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return '';
-    }
+    },
+    checkboxUsers: function checkboxUsers(chatIndex) {}
   }),
   created: function created() {
     this.getChatsFromDb();
@@ -5617,23 +5698,126 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      'messageText': ''
+      'messageText': '',
+      'repliedTo': null
     };
   },
   computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)(['messages', 'messagesIsLoading', 'users', 'currentUser', 'activeChat'])),
-  methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['addMessageToDb', 'getMessagesFromDb'])), {}, {
-    submit: function submit() {
-      this.addMessageToDb({
-        'chat_id': this.activeChat.id,
-        'text': this.messageText,
-        'user_id': this.currentUser.id
-      });
+  methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['addMessageToDb', 'getMessagesFromDb', 'updateMessageInDb', 'deleteMessageFromDb'])), {}, {
+    addMessage: function addMessage() {
+      var objNewMessage = {};
+
+      if (null !== this.repliedTo) {
+        objNewMessage.text = this.messageText.replace(this.repliedTo.text + '\n***\n', '');
+        objNewMessage.replied_to = this.repliedTo.id;
+      } else {
+        objNewMessage.text = this.messageText;
+      }
+
+      objNewMessage.chat_id = this.activeChat.id;
+      objNewMessage.user_id = this.currentUser.id;
+      this.addMessageToDb(objNewMessage);
       this.messageText = '';
+      this.repliedTo = null;
       this.getMessagesFromDb();
+    },
+    editMessage: function editMessage(index) {
+      this.updateMessageInDb({
+        id: this.messages[index].id,
+        text: document.querySelector('#editedMessage' + index).value
+      });
+      this.getMessagesFromDb();
+    },
+    deleteMessage: function deleteMessage(index) {
+      if (window.confirm("Do you really want to delete message:\n\n" + this.messages[index].text + "\n\n?")) {
+        this.deleteMessageFromDb(this.messages[index].id);
+        this.getMessagesFromDb();
+      }
+    },
+    replyMessage: function replyMessage(index) {
+      this.messageText = this.messages[index].text + '\n***\n';
+      this.repliedTo = this.messages[index];
+      this.$refs.inputMessage.focus();
+    },
+    getRepliedMessage: function getRepliedMessage(repliedToId) {
+      var neededParameter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+      var message = this.messages.filter(function (message) {
+        return message.id === repliedToId;
+      });
+
+      if (undefined === neededParameter) {
+        return message;
+      } else {
+        message = message[0];
+        return message[neededParameter];
+      }
     }
   }),
   created: function created() {
@@ -5872,47 +6056,66 @@ __webpack_require__.r(__webpack_exports__);
         state.currentUser = data;
       });
     },
-
-    /*addGetChat({dispatch}, data) {
-        if (data !== undefined) {
-            return dispatch('addChatToDb', data);
-        }
-         return dispatch('getChatsFromDb');
-    },*/
     getChatsFromDb: function getChatsFromDb(_ref5) {
       var state = _ref5.state;
       state.chatsIsLoading = true;
       return axios.get('./chats').then(function (_ref6) {
         var data = _ref6.data;
-        state.chatList = data;
+        var chats = data;
+        data.forEach(function (chat, index) {
+          if (0 === chat.title.length) {
+            return axios.get('./chats/' + chat.id + '/participants').then(function (_ref7) {
+              var data = _ref7.data;
+              var foundUser = data.filter(function (user) {
+                return user.id !== state.currentUser.id;
+              });
+              chats[index].title = foundUser[0].last_name + ' ' + foundUser[0].name;
+              chats[index].edited = true;
+            });
+          }
+        });
+        state.chatList = chats;
       })["finally"](function () {
         state.chatsIsLoading = false;
       });
     },
-    addChatToDb: function addChatToDb(_ref7, objNewChat) {
-      var actions = _ref7.actions;
-      return axios.post('./chats', objNewChat);
+    addChatToDb: function addChatToDb(_ref8, objNewChat) {
+      var actions = _ref8.actions;
+      return axios.post('./chats', objNewChat).then(function (_ref9) {
+        var data = _ref9.data;
+        console.log(data);
+      });
     },
-    getMessagesFromDb: function getMessagesFromDb(_ref8) {
-      var state = _ref8.state;
+    getMessagesFromDb: function getMessagesFromDb(_ref10) {
+      var state = _ref10.state;
 
       if (Object.keys(state.activeChat).length > 0) {
         state.messagesIsLoading = true;
-        return axios.get('./messages?chat_id=' + state.activeChat.id).then(function (_ref9) {
-          var data = _ref9.data;
+        return axios.get('./messages?chat_id=' + state.activeChat.id).then(function (_ref11) {
+          var data = _ref11.data;
           state.messagesList = data;
         })["finally"](function () {
           state.messagesIsLoading = false;
         });
       }
     },
-    addMessageToDb: function addMessageToDb(_ref10, objNewMessage) {
-      var actions = _ref10.actions;
+    addMessageToDb: function addMessageToDb(_ref12, objNewMessage) {
+      var actions = _ref12.actions;
       return axios.post('./messages', objNewMessage);
     },
-    updateActiveChat: function updateActiveChat(_ref11, objChat) {
-      var state = _ref11.state;
+    updateActiveChat: function updateActiveChat(_ref13, objChat) {
+      var state = _ref13.state;
       state.activeChat = objChat;
+    },
+    updateMessageInDb: function updateMessageInDb(_ref14, objMessage) {
+      var state = _ref14.state;
+      return axios.patch('./messages/' + objMessage.id, {
+        text: objMessage.text
+      });
+    },
+    deleteMessageFromDb: function deleteMessageFromDb(_ref15, messageId) {
+      var state = _ref15.state;
+      return axios["delete"]('./messages/' + messageId);
     }
   }
 });
@@ -10963,7 +11166,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n#chat-block {\n    border-right: 2px;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\nbody {\n    min-height: 100vh;\n    min-height: -webkit-fill-available;\n}\nhtml {\n    height: -webkit-fill-available;\n}\nmain {\n    flex-wrap: nowrap;\n    height: 100vh;\n    height: -webkit-fill-available;\n    max-height: 100vh;\n    overflow-x: auto;\n    overflow-y: hidden;\n}\n.b-example-divider {\n    flex-shrink: 0;\n    width: 1.5rem;\n    height: 100vh;\n    background-color: rgba(0, 0, 0, .1);\n    border: solid rgba(0, 0, 0, .15);\n    border-width: 1px 0;\n    box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);\n}\n#chat-block {\n    border-right: 2px;\n}\n.badge {\n    line-height: unset;\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -29104,7 +29307,7 @@ var render = function () {
       _c(
         "div",
         {
-          staticClass: "list-group col-4 list-group-flush",
+          staticClass: "list-group col-2 list-group-flush",
           staticStyle: { padding: "unset" },
           attrs: { id: "chat-block" },
         },
@@ -29155,16 +29358,13 @@ var render = function () {
             },
             _vm._l(_vm.chats, function (chat, index) {
               return _c(
-                "a",
+                "div",
                 {
                   key: chat.id,
-                  class:
-                    "list-group-item list-group-item-action" +
-                    _vm.checkChatActivation(chat.id),
+                  class: "list-group-item " + _vm.checkChatActivation(chat.id),
                   attrs: {
                     id: "list-home-list",
                     "data-bs-toggle": "list",
-                    href: "#list-chat-" + chat.id,
                     role: "tab",
                     "aria-controls": "list-chat-" + chat.id,
                   },
@@ -29175,9 +29375,278 @@ var render = function () {
                   },
                 },
                 [
-                  _vm._v(
-                    "\n                " + _vm._s(chat.title) + "\n            "
+                  _c(
+                    "div",
+                    { staticClass: "d-flex justify-content-between mb-2" },
+                    [
+                      _c("h5", [_vm._v(_vm._s(chat.title))]),
+                      _vm._v(" "),
+                      _c(
+                        "span",
+                        { staticClass: "badge bg-danger rounded-pill" },
+                        [_vm._v("14")]
+                      ),
+                    ]
                   ),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "btn-group btn-group-sm" }, [
+                    chat.created_by === _vm.currentUser.id
+                      ? _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-outline-dark",
+                            attrs: {
+                              type: "button",
+                              "data-bs-toggle": "offcanvas",
+                              "data-bs-target": "#editChat" + chat.id,
+                              "aria-controls": "editChat" + chat.id,
+                            },
+                          },
+                          [
+                            _c(
+                              "svg",
+                              {
+                                staticClass: "bi bi-trash",
+                                attrs: {
+                                  xmlns: "http://www.w3.org/2000/svg",
+                                  width: "16",
+                                  height: "16",
+                                  fill: "currentColor",
+                                  viewBox: "0 0 16 16",
+                                },
+                              },
+                              [
+                                _c("path", {
+                                  attrs: {
+                                    d: "M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z",
+                                  },
+                                }),
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("span", { staticClass: "visually-hidden" }, [
+                              _vm._v("Button"),
+                            ]),
+                          ]
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    chat.created_by === _vm.currentUser.id
+                      ? _c(
+                          "div",
+                          {
+                            staticClass: "offcanvas offcanvas-start text-black",
+                            attrs: {
+                              tabindex: "-1",
+                              id: "editChat" + chat.id,
+                              "aria-labelledby": "editChat" + chat.id + "Label",
+                            },
+                          },
+                          [
+                            _c("div", { staticClass: "offcanvas-header" }, [
+                              _c(
+                                "h5",
+                                {
+                                  staticClass: "offcanvas-title ",
+                                  attrs: { id: "editChat" + chat.id + "Label" },
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                " +
+                                      _vm._s(chat.title) +
+                                      "\n                            "
+                                  ),
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("button", {
+                                staticClass: "btn-close text-reset",
+                                attrs: {
+                                  type: "button",
+                                  "data-bs-dismiss": "offcanvas",
+                                  "aria-label": "Close",
+                                },
+                              }),
+                            ]),
+                            _vm._v(" "),
+                            _c("div", { staticClass: "offcanvas-body" }, [
+                              _c("div", { staticClass: "form-floating mb-4" }, [
+                                chat.edited
+                                  ? _c("input", {
+                                      staticClass: "form-control",
+                                      attrs: {
+                                        type: "text",
+                                        id: "floatingInput",
+                                        placeholder: "chat title",
+                                      },
+                                    })
+                                  : _c("input", {
+                                      staticClass: "form-control",
+                                      attrs: {
+                                        type: "text",
+                                        id: "floatingInput",
+                                        placeholder: "chat title",
+                                      },
+                                      domProps: { value: chat.title },
+                                    }),
+                                _vm._v(" "),
+                                _c(
+                                  "label",
+                                  { attrs: { for: "floatingInput" } },
+                                  [_vm._v("chat title")]
+                                ),
+                              ]),
+                              _vm._v(" "),
+                              _c(
+                                "ul",
+                                { staticClass: "list-group list-group-flush" },
+                                [
+                                  _c(
+                                    "li",
+                                    {
+                                      staticClass: "list-group-item active",
+                                      attrs: { "aria-current": "true" },
+                                    },
+                                    [_vm._v("participants")]
+                                  ),
+                                  _vm._v(" "),
+                                  _vm._l(chat.users, function (user) {
+                                    return _c(
+                                      "li",
+                                      { staticClass: "list-group-item" },
+                                      [
+                                        _c("input", {
+                                          staticClass: "form-check-input me-1",
+                                          attrs: {
+                                            type: "checkbox",
+                                            value: "",
+                                            "aria-label": "...",
+                                          },
+                                        }),
+                                        _vm._v(
+                                          "\n                                    First checkbox\n                                "
+                                        ),
+                                      ]
+                                    )
+                                  }),
+                                  _vm._v(" "),
+                                  _vm._m(0, true),
+                                  _vm._v(" "),
+                                  _vm._m(1, true),
+                                  _vm._v(" "),
+                                  _vm._m(2, true),
+                                  _vm._v(" "),
+                                  _vm._m(3, true),
+                                ],
+                                2
+                              ),
+                            ]),
+                          ]
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    chat.created_by !== _vm.currentUser.id
+                      ? _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-outline-dark",
+                            attrs: { type: "button" },
+                          },
+                          [
+                            _c(
+                              "svg",
+                              {
+                                staticClass: "bi bi-trash",
+                                attrs: {
+                                  xmlns: "http://www.w3.org/2000/svg",
+                                  width: "16",
+                                  height: "16",
+                                  fill: "currentColor",
+                                  viewBox: "0 0 16 16",
+                                },
+                              },
+                              [
+                                _c(
+                                  "svg",
+                                  {
+                                    staticClass: "bi bi-pencil",
+                                    attrs: {
+                                      xmlns: "http://www.w3.org/2000/svg",
+                                      width: "16",
+                                      height: "16",
+                                      fill: "currentColor",
+                                      viewBox: "0 0 16 16",
+                                    },
+                                  },
+                                  [
+                                    _c("path", {
+                                      attrs: {
+                                        "fill-rule": "evenodd",
+                                        d: "M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z",
+                                      },
+                                    }),
+                                    _vm._v(" "),
+                                    _c("path", {
+                                      attrs: {
+                                        "fill-rule": "evenodd",
+                                        d: "M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z",
+                                      },
+                                    }),
+                                  ]
+                                ),
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("span", { staticClass: "visually-hidden" }, [
+                              _vm._v("Button"),
+                            ]),
+                          ]
+                        )
+                      : _vm._e(),
+                    _vm._v(" "),
+                    chat.created_by === _vm.currentUser.id
+                      ? _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-outline-dark",
+                            attrs: { type: "button" },
+                          },
+                          [
+                            _c(
+                              "svg",
+                              {
+                                staticClass: "bi bi-trash",
+                                attrs: {
+                                  xmlns: "http://www.w3.org/2000/svg",
+                                  width: "16",
+                                  height: "16",
+                                  fill: "currentColor",
+                                  viewBox: "0 0 16 16",
+                                },
+                              },
+                              [
+                                _c("path", {
+                                  attrs: {
+                                    d: "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z",
+                                  },
+                                }),
+                                _vm._v(" "),
+                                _c("path", {
+                                  attrs: {
+                                    "fill-rule": "evenodd",
+                                    d: "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z",
+                                  },
+                                }),
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("span", { staticClass: "visually-hidden" }, [
+                              _vm._v("Button"),
+                            ]),
+                          ]
+                        )
+                      : _vm._e(),
+                  ]),
                 ]
               )
             }),
@@ -29187,16 +29656,78 @@ var render = function () {
         1
       ),
       _vm._v(" "),
+      _c("div", { staticClass: "b-example-divider" }),
+      _vm._v(" "),
       _c(
         "div",
-        { staticClass: "col-8", staticStyle: { padding: "unset" } },
+        {
+          staticClass: "col-10",
+          staticStyle: { padding: "unset", width: "82%" },
+        },
         [_c("messages-list")],
         1
       ),
     ]
   )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "list-group-item" }, [
+      _c("input", {
+        staticClass: "form-check-input me-1",
+        attrs: { type: "checkbox", value: "", "aria-label": "..." },
+      }),
+      _vm._v(
+        "\n                                    Second checkbox\n                                "
+      ),
+    ])
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "list-group-item" }, [
+      _c("input", {
+        staticClass: "form-check-input me-1",
+        attrs: { type: "checkbox", value: "", "aria-label": "..." },
+      }),
+      _vm._v(
+        "\n                                    Third checkbox\n                                "
+      ),
+    ])
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "list-group-item" }, [
+      _c("input", {
+        staticClass: "form-check-input me-1",
+        attrs: { type: "checkbox", value: "", "aria-label": "..." },
+      }),
+      _vm._v(
+        "\n                                    Fourth checkbox\n                                "
+      ),
+    ])
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "list-group-item" }, [
+      _c("input", {
+        staticClass: "form-check-input me-1",
+        attrs: { type: "checkbox", value: "", "aria-label": "..." },
+      }),
+      _vm._v(
+        "\n                                    Fifth checkbox\n                                "
+      ),
+    ])
+  },
+]
 render._withStripped = true
 
 
@@ -29223,7 +29754,7 @@ var render = function () {
     _c(
       "button",
       {
-        staticClass: "btn btn-outline-success dropdown-toggle",
+        staticClass: "btn btn-outline-dark dropdown-toggle",
         attrs: {
           type: "button",
           "data-bs-toggle": "dropdown",
@@ -29505,7 +30036,7 @@ var staticRenderFns = [
             _c(
               "button",
               {
-                staticClass: "btn btn-link text-decoration-none link-success",
+                staticClass: "btn btn-link text-decoration-none link-dark",
                 attrs: { type: "submit" },
               },
               [_vm._v("create\n                                ")]
@@ -29545,27 +30076,232 @@ var render = function () {
         staticClass: "tab-content list-group list-group-flush",
         attrs: { id: "nav-tabContent" },
       },
-      _vm._l(_vm.messages, function (message) {
-        return _c(
-          "div",
-          {
-            key: message.id,
-            staticClass: "list-group-item list-group-item-action",
-          },
-          [
-            _c("div", { staticClass: "d-flex w-100 justify-content-between" }, [
-              _c("h5", { staticClass: "mb-1" }, [
-                _vm._v(_vm._s(message.user_fullname)),
-              ]),
-              _vm._v(" "),
-              _c("small", { staticClass: "text-muted" }, [
-                _vm._v(_vm._s(message.formatted_date)),
-              ]),
+      _vm._l(_vm.messages, function (message, index) {
+        return _c("div", { key: message.id, staticClass: "list-group-item" }, [
+          _c("div", { staticClass: "d-flex w-100 justify-content-between" }, [
+            _c("h5", { staticClass: "mb-1" }, [
+              _vm._v(_vm._s(message.user_fullname)),
             ]),
             _vm._v(" "),
-            _c("p", { staticClass: "mb-1" }, [_vm._v(_vm._s(message.text))]),
-          ]
-        )
+            _c("small", { staticClass: "text-muted" }, [
+              _vm._v(_vm._s(message.formatted_date)),
+            ]),
+          ]),
+          _vm._v(" "),
+          _c("p", { ref: "messageText", refInFor: true, staticClass: "mb-1" }, [
+            _vm._v(_vm._s(message.text)),
+          ]),
+          _vm._v(" "),
+          message.replied_to
+            ? _c("figcaption", { staticClass: "blockquote-footer mt-1" }, [
+                _vm._v(
+                  "\n                " +
+                    _vm._s(_vm.getRepliedMessage(message.replied_to, "text")) +
+                    " by "
+                ),
+                _c("cite", { attrs: { title: "Source Title" } }, [
+                  _vm._v(
+                    _vm._s(
+                      _vm.getRepliedMessage(message.replied_to, "user_fullname")
+                    )
+                  ),
+                ]),
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _c("div", { staticClass: "d-flex justify-content-end" }, [
+            _c("div", { staticClass: "btn-group btn-group-sm" }, [
+              message.user_id === _vm.currentUser.id
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-outline-dark",
+                      attrs: {
+                        type: "button",
+                        "data-bs-toggle": "modal",
+                        "data-bs-target": "#editMessage" + message.id,
+                      },
+                    },
+                    [
+                      _c(
+                        "svg",
+                        {
+                          staticClass: "bi bi-trash",
+                          attrs: {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            width: "16",
+                            height: "16",
+                            fill: "currentColor",
+                            viewBox: "0 0 16 16",
+                          },
+                        },
+                        [
+                          _c("path", {
+                            attrs: {
+                              d: "M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z",
+                            },
+                          }),
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "visually-hidden" }, [
+                        _vm._v("Button"),
+                      ]),
+                    ]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              message.user_id === _vm.currentUser.id
+                ? _c(
+                    "div",
+                    {
+                      staticClass: "modal fade",
+                      attrs: {
+                        id: "editMessage" + message.id,
+                        tabindex: "-1",
+                        "aria-hidden": "true",
+                      },
+                    },
+                    [
+                      _c("div", { staticClass: "modal-dialog" }, [
+                        _c("div", { staticClass: "modal-content" }, [
+                          _c(
+                            "form",
+                            {
+                              on: {
+                                submit: function ($event) {
+                                  $event.preventDefault()
+                                  return _vm.editMessage(index)
+                                },
+                              },
+                            },
+                            [
+                              _c("div", { staticClass: "modal-body" }, [
+                                _c(
+                                  "textarea",
+                                  {
+                                    staticClass: "form-control",
+                                    attrs: { id: "editedMessage" + index },
+                                  },
+                                  [_vm._v(_vm._s(message.text))]
+                                ),
+                              ]),
+                              _vm._v(" "),
+                              _vm._m(0, true),
+                            ]
+                          ),
+                        ]),
+                      ]),
+                    ]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              message.user_id !== _vm.currentUser.id
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-outline-dark",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function ($event) {
+                          return _vm.replyMessage(index)
+                        },
+                      },
+                    },
+                    [
+                      _c(
+                        "svg",
+                        {
+                          staticClass: "bi bi-trash",
+                          attrs: {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            width: "16",
+                            height: "16",
+                            fill: "currentColor",
+                            viewBox: "0 0 16 16",
+                          },
+                        },
+                        [
+                          _c(
+                            "svg",
+                            {
+                              staticClass: "bi bi-pencil",
+                              attrs: {
+                                xmlns: "http://www.w3.org/2000/svg",
+                                width: "16",
+                                height: "16",
+                                fill: "currentColor",
+                                viewBox: "0 0 16 16",
+                              },
+                            },
+                            [
+                              _c("path", {
+                                attrs: {
+                                  d: "M6.598 5.013a.144.144 0 0 1 .202.134V6.3a.5.5 0 0 0 .5.5c.667 0 2.013.005 3.3.822.984.624 1.99 1.76 2.595 3.876-1.02-.983-2.185-1.516-3.205-1.799a8.74 8.74 0 0 0-1.921-.306 7.404 7.404 0 0 0-.798.008h-.013l-.005.001h-.001L7.3 9.9l-.05-.498a.5.5 0 0 0-.45.498v1.153c0 .108-.11.176-.202.134L2.614 8.254a.503.503 0 0 0-.042-.028.147.147 0 0 1 0-.252.499.499 0 0 0 .042-.028l3.984-2.933zM7.8 10.386c.068 0 .143.003.223.006.434.02 1.034.086 1.7.271 1.326.368 2.896 1.202 3.94 3.08a.5.5 0 0 0 .933-.305c-.464-3.71-1.886-5.662-3.46-6.66-1.245-.79-2.527-.942-3.336-.971v-.66a1.144 1.144 0 0 0-1.767-.96l-3.994 2.94a1.147 1.147 0 0 0 0 1.946l3.994 2.94a1.144 1.144 0 0 0 1.767-.96v-.667z",
+                                },
+                              }),
+                            ]
+                          ),
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "visually-hidden" }, [
+                        _vm._v("Button"),
+                      ]),
+                    ]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              message.user_id === _vm.currentUser.id
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-outline-dark",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function ($event) {
+                          return _vm.deleteMessage(index)
+                        },
+                      },
+                    },
+                    [
+                      _c(
+                        "svg",
+                        {
+                          staticClass: "bi bi-trash",
+                          attrs: {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            width: "16",
+                            height: "16",
+                            fill: "currentColor",
+                            viewBox: "0 0 16 16",
+                          },
+                        },
+                        [
+                          _c("path", {
+                            attrs: {
+                              d: "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z",
+                            },
+                          }),
+                          _vm._v(" "),
+                          _c("path", {
+                            attrs: {
+                              "fill-rule": "evenodd",
+                              d: "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z",
+                            },
+                          }),
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "visually-hidden" }, [
+                        _vm._v("Button"),
+                      ]),
+                    ]
+                  )
+                : _vm._e(),
+            ]),
+          ]),
+        ])
       }),
       0
     ),
@@ -29576,7 +30312,7 @@ var render = function () {
         on: {
           submit: function ($event) {
             $event.preventDefault()
-            return _vm.submit.apply(null, arguments)
+            return _vm.addMessage.apply(null, arguments)
           },
         },
       },
@@ -29585,10 +30321,10 @@ var render = function () {
           "div",
           {
             staticClass: "input-group position-absolute bottom-0",
-            staticStyle: { width: "66.6%" },
+            staticStyle: { width: "82%" },
           },
           [
-            _c("input", {
+            _c("textarea", {
               directives: [
                 {
                   name: "model",
@@ -29597,14 +30333,9 @@ var render = function () {
                   expression: "messageText",
                 },
               ],
+              ref: "inputMessage",
               staticClass: "form-control",
-              attrs: {
-                type: "text",
-                placeholder: "write a message...",
-                "aria-label": "Recipient's username",
-                "aria-describedby": "button-addon2",
-                name: "text",
-              },
+              attrs: { placeholder: "write a message...", name: "text" },
               domProps: { value: _vm.messageText },
               on: {
                 input: function ($event) {
@@ -29619,7 +30350,7 @@ var render = function () {
             _c(
               "button",
               {
-                staticClass: "btn btn-outline-success",
+                staticClass: "btn btn-outline-dark",
                 attrs: { type: "submit", id: "button-addon2" },
               },
               [_vm._v("send")]
@@ -29630,7 +30361,36 @@ var render = function () {
     ),
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-footer" }, [
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-secondary",
+          attrs: { type: "button", "data-bs-dismiss": "modal" },
+        },
+        [
+          _vm._v(
+            "\n                                            close\n                                        "
+          ),
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-primary",
+          attrs: { type: "submit", "data-bs-dismiss": "modal" },
+        },
+        [_vm._v("save\n                                        ")]
+      ),
+    ])
+  },
+]
 render._withStripped = true
 
 

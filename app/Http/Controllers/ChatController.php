@@ -8,6 +8,7 @@ use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,7 @@ class ChatController extends Controller
     public function index(Request $request)
     {
         if ($request->hasHeader('X-Requested-With')) {
-            return Auth::user()->chats;
+            return Auth::user()->chats()->with('users')->get();
         } else {
             $chats = Auth::user()->chats;
             $users = User::all();
@@ -51,8 +52,10 @@ class ChatController extends Controller
     public function store(StoreChatRequest $request): void
     {
         if (empty($request->title)) {
-            $lastChatId = Chat::all()->last()->id;
-            $request->title = 'chat #'.$lastChatId + 1;
+            if (count($request->usersId) > 1) {
+                $lastChatId = Chat::all()->last()->id;
+                $request['title'] = 'chat #'.$lastChatId + 1;
+            }
         }
         $result = Chat::create($request->except(['usersId']));
         $arData = [];
@@ -116,5 +119,18 @@ class ChatController extends Controller
     public function destroy(Chat $chat)
     {
         //
+    }
+
+    /**
+     *
+     * @param  Request  $request
+     * @param  Chat  $chat
+     */
+    public function getParticipants(Request $request, Chat $chat)
+    {
+        if ($request->hasHeader('X-Requested-With')) {
+            return $chat->users;
+        }
+        return [];
     }
 }

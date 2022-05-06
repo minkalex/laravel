@@ -13,8 +13,9 @@
     <title>Chat</title>
 </head>
 <body>
+<main>
     <div id="app">
         <chat-list :user-from-blade="{{ Auth::user() }}"></chat-list>
     </div>
-</body>
+</main>
 </html>

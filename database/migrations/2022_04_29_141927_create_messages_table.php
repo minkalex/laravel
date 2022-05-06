@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('text');
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Chat::class);
+            $table->unsignedBigInteger('replied_to')->nullable();
         });
     }
 
