@@ -31,7 +31,7 @@ Route::controller(UserController::class)->group(function () {
 });
 
 Route::get('/chats/{chat}/participants', [ChatController::class, 'getParticipants']);
-Route::get('/chat', [ChatController::class, 'index']);
+Route::get('/chat', [ChatController::class, 'index'])->name('chats');
 Route::get('/messages?chat_id={chat_id}', [MessageController::class, 'index']);
 
 /*Route::fallback(function () {

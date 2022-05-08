@@ -22,66 +22,108 @@
                 >
                     <div class="d-flex justify-content-between mb-2">
                         <h5>{{ chat.title }}</h5>
-                        <span class="badge bg-danger rounded-pill">14</span>
+                        <!--<span class="badge bg-danger rounded-pill">14</span>-->
                     </div>
                     <div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-dark" v-if="chat.created_by === currentUser.id"
-                                data-bs-toggle="offcanvas" :data-bs-target="'#editChat' + chat.id"
-                                :aria-controls="'editChat' + chat.id">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-trash" viewBox="0 0 16 16">
+                        <button
+                            type="button"
+                            class="btn btn-outline-dark"
+                            v-if="chat.created_by === currentUser.id"
+                            data-bs-toggle="offcanvas"
+                            :data-bs-target="'#editChat' + chat.id"
+                            :aria-controls="'editChat' + chat.id"
+                            @click="getUsers(index)"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                fill="currentColor"
+                                class="bi bi-trash"
+                                viewBox="0 0 16 16"
+                            >
                                 <path
                                     d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                             </svg>
                             <span class="visually-hidden">Button</span>
                         </button>
                         <!-- Modal -->
-                        <div class="offcanvas offcanvas-start text-black" tabindex="-1" :id="'editChat' + chat.id"
-                             :aria-labelledby="'editChat' + chat.id + 'Label'" v-if="chat.created_by === currentUser.id">
+                        <div
+                            class="offcanvas offcanvas-start text-black"
+                            tabindex="-1"
+                            :id="'editChat' + chat.id"
+                            :aria-labelledby="'editChat' + chat.id + 'Label'"
+                            v-if="chat.created_by === currentUser.id"
+                        >
                             <div class="offcanvas-header">
                                 <h5 class="offcanvas-title " :id="'editChat' + chat.id + 'Label'">
                                     {{ chat.title }}
                                 </h5>
-                                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                                        aria-label="Close"></button>
+                                <button
+                                    type="button"
+                                    class="btn-close text-reset"
+                                    data-bs-dismiss="offcanvas"
+                                    aria-label="Close"
+                                >
+                                </button>
                             </div>
                             <div class="offcanvas-body">
-                                <div class="form-floating mb-4">
-                                    <input type="text" v-if="chat.edited" class="form-control" id="floatingInput" placeholder="chat title">
-                                    <input type="text" v-else class="form-control" id="floatingInput" placeholder="chat title"
-                                           :value="chat.title">
-                                    <label for="floatingInput">chat title</label>
-                                </div>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item active" aria-current="true">participants</li>
-                                    <li v-for="user in chat.users" class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                                        First checkbox
-                                    </li>
-                                    <li class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                                        Second checkbox
-                                    </li>
-                                    <li class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                                        Third checkbox
-                                    </li>
-                                    <li class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                                        Fourth checkbox
-                                    </li>
-                                    <li class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
-                                        Fifth checkbox
-                                    </li>
-                                </ul>
+                                <form @submit.prevent="editChat(chat.id)">
+                                    <div class="form-floating mb-4">
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="floatingInput"
+                                            placeholder="chat title"
+                                            v-model="chatTitle"
+                                        >
+                                        <label for="floatingInput">chat title</label>
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item active" aria-current="true">participants</li>
+                                        <li v-for="user in users" class="list-group-item">
+                                            <input
+                                                class="form-check-input me-1"
+                                                type="checkbox"
+                                                :value="user.id"
+                                                v-model="checkedUsers"
+                                                :disabled="user.id === currentUser.id"
+                                            >
+                                            {{ user.last_name + ' ' + user.name }}
+                                        </li>
+                                    </ul>
+                                    <div class="d-flex justify-content-end">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-outline-dark mt-4"
+                                            data-bs-dismiss="offcanvas">save
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-outline-dark" v-if="chat.created_by !== currentUser.id">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-trash" viewBox="0 0 16 16">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                     class="bi bi-pencil" viewBox="0 0 16 16">
+                        <button
+                            type="button"
+                            class="btn btn-outline-dark"
+                            v-if="chat.created_by !== currentUser.id"
+                            @click="leaveChat(index)"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                fill="currentColor"
+                                class="bi bi-trash"
+                                viewBox="0 0 16 16"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    fill="currentColor"
+                                    class="bi bi-pencil"
+                                    viewBox="0 0 16 16"
+                                >
                                     <path fill-rule="evenodd"
                                           d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z"/>
                                     <path fill-rule="evenodd"
@@ -90,9 +132,20 @@
                             </svg>
                             <span class="visually-hidden">Button</span>
                         </button>
-                        <button type="button" class="btn btn-outline-dark" v-if="chat.created_by === currentUser.id">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                 class="bi bi-trash" viewBox="0 0 16 16">
+                        <button
+                            type="button"
+                            class="btn btn-outline-dark"
+                            v-if="chat.created_by === currentUser.id"
+                            @click="deleteChat(index)"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                fill="currentColor"
+                                class="bi bi-trash"
+                                viewBox="0 0 16 16"
+                            >
                                 <path
                                     d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
                                 <path fill-rule="evenodd"
@@ -101,6 +154,23 @@
                             <span class="visually-hidden">Button</span>
                         </button>
                     </div>
+                </div>
+            </div>
+            <div class="position-absolute bottom-0 p-3" style="width: 16%">
+                <hr>
+                <div class="dropdown ">
+                    <a href="#" class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"
+                       id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>{{ currentUser.last_name + ' ' + currentUser.name}}</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" :href="'/users/' + currentUser.id+ '/edit'">Edit</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="/logout">Sign out</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -117,6 +187,13 @@ import CreateChatButton from "./CreateChatButton";
 import MessagesList from "./MessagesList";
 
 export default {
+    data() {
+        return {
+            'checkedUsers': [],
+            'chatTitle': '',
+        }
+    },
+
     props: [
         'UserFromBlade',
     ],
@@ -133,7 +210,7 @@ export default {
 
     components: {
         MessagesList,
-        CreateChatButton
+        CreateChatButton,
     },
 
     methods: {
@@ -142,8 +219,12 @@ export default {
             'getMessagesFromDb',
             'updateActiveChat'
         ]),
-        setActiveChat(index) {
-            this.updateActiveChat(this.chats[index])
+        setActiveChat(index = undefined) {
+            if (undefined === index) {
+                this.updateActiveChat({})
+            } else {
+                this.updateActiveChat(this.chats[index])
+            }
             this.getMessagesFromDb()
         },
         checkChatActivation(chatId) {
@@ -152,8 +233,53 @@ export default {
             }
             return ''
         },
-        checkboxUsers(chatIndex) {
-            
+        getUsers(chatIndex) {
+            let self = this
+            this.checkedUsers = []
+            this.users.forEach(function (userFromDb) {
+                self.chats[chatIndex].users.forEach(function (userFromChat) {
+                    if (userFromDb.id === userFromChat.id) {
+                        self.checkedUsers.push(userFromDb.id)
+                    }
+                })
+            })
+            this.chatTitle = this.chats[chatIndex].edited ? '' : this.chats[chatIndex].title
+        },
+        editChat(chatId) {
+            let self = this
+            axios.patch('./chats/' + chatId, {usersId: this.checkedUsers, title: this.chatTitle, action: 'edit'})
+                .then(function () {
+                    self.getChatsFromDb()
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+        },
+        leaveChat(chatIndex) {
+            if (window.confirm("do you really want to leave the chat:\n\n" + this.chats[chatIndex].title + "\n\n?")) {
+                let self = this
+                axios.patch('./chats/' + this.chats[chatIndex].id, {userId: this.currentUser.id, action: 'leave'})
+                    .then(function () {
+                        self.getChatsFromDb()
+                        self.setActiveChat()
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            }
+        },
+        deleteChat(chatIndex) {
+            if (window.confirm("do you really want to delete the chat:\n\n" + this.chats[chatIndex].title + "\n\n?")) {
+                let self = this
+                axios.delete('./chats/' + this.chats[chatIndex].id)
+                    .then(function () {
+                        self.getChatsFromDb()
+                        self.setActiveChat()
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            }
         }
     },
 

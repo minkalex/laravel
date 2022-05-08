@@ -20,25 +20,28 @@ class MessageController extends Controller
     public function index(Request $request)
     {
         if ($request->hasHeader('X-Requested-With')) {
-            $arrMessages = Chat::find($request->chat_id)->messages;
-            $arrUsers = User::all();
-            foreach ($arrMessages as $index => $arrMessage) {
-                foreach ($arrUsers as $arrUser) {
-                    if ($arrUser->id === $arrMessage->user_id) {
-                        $arrMessages[$index]['user_fullname'] = $arrUser->full_name;
+            $chat = Chat::find($request->chat_id);
+            if (null !== $chat) {
+                $arrMessages = $chat->messages;
+                $arrUsers = User::all();
+                foreach ($arrMessages as $index => $arrMessage) {
+                    foreach ($arrUsers as $arrUser) {
+                        if ($arrUser->id === $arrMessage->user_id) {
+                            $arrMessages[$index]['user_fullname'] = $arrUser->full_name;
+                        }
                     }
-                }
-                $arrMessages[$index]['formatted_date'] = date('d.m.Y H:i', strtotime($arrMessage['created_at']));
-                if (null !== $arrMessage->replied_to) {
-                    foreach ($arrMessages as $message) {
-                        if ($arrMessage->replied_to === $message->id) {
-                            $arrMessages[$index]['replied_text'] = $message->text;
-                            $arrMessages[$index]['replied_author'] = $message->text;
+                    $arrMessages[$index]['formatted_date'] = date('d.m.Y H:i', strtotime($arrMessage['created_at']));
+                    if (null !== $arrMessage->replied_to) {
+                        foreach ($arrMessages as $message) {
+                            if ($arrMessage->replied_to === $message->id) {
+                                $arrMessages[$index]['replied_text'] = $message->text;
+                                $arrMessages[$index]['replied_author'] = $message->text;
+                            }
                         }
                     }
                 }
+                return $arrMessages;
             }
-            return $arrMessages;
         }
         return [];
     }
@@ -62,6 +65,9 @@ class MessageController extends Controller
     public function store(StoreMessageRequest $request)
     {
         Message::create($request->all());
+        $chat = Chat::find($request->chat_id);
+        $chat->updated_at = date('c');
+        $chat->save();
     }
 
     /**
@@ -97,6 +103,9 @@ class MessageController extends Controller
     {
         $message->text = $request->text;
         $message->save();
+        $chat = Chat::find($request->chat_id);
+        $chat->updated_at = date('c');
+        $chat->save();
     }
 
     /**

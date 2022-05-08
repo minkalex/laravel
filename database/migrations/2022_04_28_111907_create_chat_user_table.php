@@ -19,7 +19,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Chat::class);
-            $table->unique(['chat_id', 'user_id']);
             $table->timestamps();
         });
     }

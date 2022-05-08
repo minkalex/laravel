@@ -43,14 +43,18 @@ export default {
                 .then(({data}) => {
                     let chats = data
                     data.forEach(function (chat, index) {
-                        if (0 === chat.title.length) {
+                        if (null === chat.title) {
                             return axios.get('./chats/' + chat.id + '/participants')
                                 .then(({data}) => {
                                     let foundUser = data.filter(function (user) {
                                         return user.id !== state.currentUser.id
                                     })
-                                    chats[index].title = foundUser[0].last_name + ' ' + foundUser[0].name
-                                    chats[index].edited = true
+                                    if (foundUser.length > 0) {
+                                        chats[index].title = foundUser[0].last_name + ' ' + foundUser[0].name
+                                        chats[index].edited = true
+                                    } else {
+                                        chats[index].title = 'chat #' + chat.id
+                                    }
                                 })
                         }
                     })
@@ -69,7 +73,7 @@ export default {
         },
 
         getMessagesFromDb({state}) {
-            if (Object.keys(state.activeChat).length > 0) {
+            if (undefined !== state.activeChat.id) {
                 state.messagesIsLoading = true;
                 return axios.get('./messages?chat_id=' + state.activeChat.id)
                     .then(({data}) => {
@@ -78,10 +82,12 @@ export default {
                     .finally(() => {
                         state.messagesIsLoading = false;
                     });
+            } else {
+                state.messagesList = []
             }
         },
 
-        addMessageToDb({actions}, objNewMessage) {
+        addMessageToDb({state}, objNewMessage) {
             return axios.post('./messages', objNewMessage)
         },
 
@@ -90,7 +96,7 @@ export default {
         },
 
         updateMessageInDb({state}, objMessage) {
-            return axios.patch('./messages/' + objMessage.id, {text: objMessage.text});
+            return axios.patch('./messages/' + objMessage.id, {text: objMessage.text, chat_id: objMessage.chat_id});
         },
 
         deleteMessageFromDb({state}, messageId) {

@@ -19,6 +19,7 @@ class Chat extends Model
     protected $fillable = [
         'title',
         'created_by',
+        'updated_at',
     ];
 
     /**

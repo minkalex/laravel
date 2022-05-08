@@ -5490,10 +5490,86 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  data: function data() {
+    return {
+      'checkedUsers': [],
+      'chatTitle': ''
+    };
+  },
   props: ['UserFromBlade'],
   computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_2__.mapGetters)(['chats', 'chatsIsLoading', 'activeChat', 'currentUser', 'users'])),
   components: {
@@ -5501,8 +5577,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     CreateChatButton: _CreateChatButton__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_2__.mapActions)(['getChatsFromDb', 'getMessagesFromDb', 'updateActiveChat'])), {}, {
-    setActiveChat: function setActiveChat(index) {
-      this.updateActiveChat(this.chats[index]);
+    setActiveChat: function setActiveChat() {
+      var index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
+
+      if (undefined === index) {
+        this.updateActiveChat({});
+      } else {
+        this.updateActiveChat(this.chats[index]);
+      }
+
       this.getMessagesFromDb();
     },
     checkChatActivation: function checkChatActivation(chatId) {
@@ -5512,7 +5595,55 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       return '';
     },
-    checkboxUsers: function checkboxUsers(chatIndex) {}
+    getUsers: function getUsers(chatIndex) {
+      var self = this;
+      this.checkedUsers = [];
+      this.users.forEach(function (userFromDb) {
+        self.chats[chatIndex].users.forEach(function (userFromChat) {
+          if (userFromDb.id === userFromChat.id) {
+            self.checkedUsers.push(userFromDb.id);
+          }
+        });
+      });
+      this.chatTitle = this.chats[chatIndex].edited ? '' : this.chats[chatIndex].title;
+    },
+    editChat: function editChat(chatId) {
+      var self = this;
+      axios.patch('./chats/' + chatId, {
+        usersId: this.checkedUsers,
+        title: this.chatTitle,
+        action: 'edit'
+      }).then(function () {
+        self.getChatsFromDb();
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    leaveChat: function leaveChat(chatIndex) {
+      if (window.confirm("do you really want to leave the chat:\n\n" + this.chats[chatIndex].title + "\n\n?")) {
+        var self = this;
+        axios.patch('./chats/' + this.chats[chatIndex].id, {
+          userId: this.currentUser.id,
+          action: 'leave'
+        }).then(function () {
+          self.getChatsFromDb();
+          self.setActiveChat();
+        })["catch"](function (error) {
+          console.log(error);
+        });
+      }
+    },
+    deleteChat: function deleteChat(chatIndex) {
+      if (window.confirm("do you really want to delete the chat:\n\n" + this.chats[chatIndex].title + "\n\n?")) {
+        var self = this;
+        axios["delete"]('./chats/' + this.chats[chatIndex].id).then(function () {
+          self.getChatsFromDb();
+          self.setActiveChat();
+        })["catch"](function (error) {
+          console.log(error);
+        });
+      }
+    }
   }),
   created: function created() {
     this.getChatsFromDb();
@@ -5761,6 +5892,45 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
@@ -5791,12 +5961,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     editMessage: function editMessage(index) {
       this.updateMessageInDb({
         id: this.messages[index].id,
-        text: document.querySelector('#editedMessage' + index).value
+        text: document.querySelector('#editedMessage' + index).value,
+        chat_id: this.messages[index].chat_id
       });
       this.getMessagesFromDb();
     },
     deleteMessage: function deleteMessage(index) {
-      if (window.confirm("Do you really want to delete message:\n\n" + this.messages[index].text + "\n\n?")) {
+      if (window.confirm("do you really want to delete message:\n\n" + this.messages[index].text + "\n\n?")) {
         this.deleteMessageFromDb(this.messages[index].id);
         this.getMessagesFromDb();
       }
@@ -6063,14 +6234,19 @@ __webpack_require__.r(__webpack_exports__);
         var data = _ref6.data;
         var chats = data;
         data.forEach(function (chat, index) {
-          if (0 === chat.title.length) {
+          if (null === chat.title) {
             return axios.get('./chats/' + chat.id + '/participants').then(function (_ref7) {
               var data = _ref7.data;
               var foundUser = data.filter(function (user) {
                 return user.id !== state.currentUser.id;
               });
-              chats[index].title = foundUser[0].last_name + ' ' + foundUser[0].name;
-              chats[index].edited = true;
+
+              if (foundUser.length > 0) {
+                chats[index].title = foundUser[0].last_name + ' ' + foundUser[0].name;
+                chats[index].edited = true;
+              } else {
+                chats[index].title = 'chat #' + chat.id;
+              }
             });
           }
         });
@@ -6089,7 +6265,7 @@ __webpack_require__.r(__webpack_exports__);
     getMessagesFromDb: function getMessagesFromDb(_ref10) {
       var state = _ref10.state;
 
-      if (Object.keys(state.activeChat).length > 0) {
+      if (undefined !== state.activeChat.id) {
         state.messagesIsLoading = true;
         return axios.get('./messages?chat_id=' + state.activeChat.id).then(function (_ref11) {
           var data = _ref11.data;
@@ -6097,10 +6273,12 @@ __webpack_require__.r(__webpack_exports__);
         })["finally"](function () {
           state.messagesIsLoading = false;
         });
+      } else {
+        state.messagesList = [];
       }
     },
     addMessageToDb: function addMessageToDb(_ref12, objNewMessage) {
-      var actions = _ref12.actions;
+      var state = _ref12.state;
       return axios.post('./messages', objNewMessage);
     },
     updateActiveChat: function updateActiveChat(_ref13, objChat) {
@@ -6110,7 +6288,8 @@ __webpack_require__.r(__webpack_exports__);
     updateMessageInDb: function updateMessageInDb(_ref14, objMessage) {
       var state = _ref14.state;
       return axios.patch('./messages/' + objMessage.id, {
-        text: objMessage.text
+        text: objMessage.text,
+        chat_id: objMessage.chat_id
       });
     },
     deleteMessageFromDb: function deleteMessageFromDb(_ref15, messageId) {
@@ -29378,15 +29557,7 @@ var render = function () {
                   _c(
                     "div",
                     { staticClass: "d-flex justify-content-between mb-2" },
-                    [
-                      _c("h5", [_vm._v(_vm._s(chat.title))]),
-                      _vm._v(" "),
-                      _c(
-                        "span",
-                        { staticClass: "badge bg-danger rounded-pill" },
-                        [_vm._v("14")]
-                      ),
-                    ]
+                    [_c("h5", [_vm._v(_vm._s(chat.title))])]
                   ),
                   _vm._v(" "),
                   _c("div", { staticClass: "btn-group btn-group-sm" }, [
@@ -29400,6 +29571,11 @@ var render = function () {
                               "data-bs-toggle": "offcanvas",
                               "data-bs-target": "#editChat" + chat.id,
                               "aria-controls": "editChat" + chat.id,
+                            },
+                            on: {
+                              click: function ($event) {
+                                return _vm.getUsers(index)
+                              },
                             },
                           },
                           [
@@ -29470,75 +29646,150 @@ var render = function () {
                             ]),
                             _vm._v(" "),
                             _c("div", { staticClass: "offcanvas-body" }, [
-                              _c("div", { staticClass: "form-floating mb-4" }, [
-                                chat.edited
-                                  ? _c("input", {
-                                      staticClass: "form-control",
-                                      attrs: {
-                                        type: "text",
-                                        id: "floatingInput",
-                                        placeholder: "chat title",
-                                      },
-                                    })
-                                  : _c("input", {
-                                      staticClass: "form-control",
-                                      attrs: {
-                                        type: "text",
-                                        id: "floatingInput",
-                                        placeholder: "chat title",
-                                      },
-                                      domProps: { value: chat.title },
-                                    }),
-                                _vm._v(" "),
-                                _c(
-                                  "label",
-                                  { attrs: { for: "floatingInput" } },
-                                  [_vm._v("chat title")]
-                                ),
-                              ]),
-                              _vm._v(" "),
                               _c(
-                                "ul",
-                                { staticClass: "list-group list-group-flush" },
+                                "form",
+                                {
+                                  on: {
+                                    submit: function ($event) {
+                                      $event.preventDefault()
+                                      return _vm.editChat(chat.id)
+                                    },
+                                  },
+                                },
                                 [
                                   _c(
-                                    "li",
-                                    {
-                                      staticClass: "list-group-item active",
-                                      attrs: { "aria-current": "true" },
-                                    },
-                                    [_vm._v("participants")]
+                                    "div",
+                                    { staticClass: "form-floating mb-4" },
+                                    [
+                                      _c("input", {
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: _vm.chatTitle,
+                                            expression: "chatTitle",
+                                          },
+                                        ],
+                                        staticClass: "form-control",
+                                        attrs: {
+                                          type: "text",
+                                          id: "floatingInput",
+                                          placeholder: "chat title",
+                                        },
+                                        domProps: { value: _vm.chatTitle },
+                                        on: {
+                                          input: function ($event) {
+                                            if ($event.target.composing) {
+                                              return
+                                            }
+                                            _vm.chatTitle = $event.target.value
+                                          },
+                                        },
+                                      }),
+                                      _vm._v(" "),
+                                      _c(
+                                        "label",
+                                        { attrs: { for: "floatingInput" } },
+                                        [_vm._v("chat title")]
+                                      ),
+                                    ]
                                   ),
                                   _vm._v(" "),
-                                  _vm._l(chat.users, function (user) {
-                                    return _c(
-                                      "li",
-                                      { staticClass: "list-group-item" },
-                                      [
-                                        _c("input", {
-                                          staticClass: "form-check-input me-1",
-                                          attrs: {
-                                            type: "checkbox",
-                                            value: "",
-                                            "aria-label": "...",
-                                          },
-                                        }),
-                                        _vm._v(
-                                          "\n                                    First checkbox\n                                "
-                                        ),
-                                      ]
-                                    )
-                                  }),
+                                  _c(
+                                    "ul",
+                                    {
+                                      staticClass:
+                                        "list-group list-group-flush",
+                                    },
+                                    [
+                                      _c(
+                                        "li",
+                                        {
+                                          staticClass: "list-group-item active",
+                                          attrs: { "aria-current": "true" },
+                                        },
+                                        [_vm._v("participants")]
+                                      ),
+                                      _vm._v(" "),
+                                      _vm._l(_vm.users, function (user) {
+                                        return _c(
+                                          "li",
+                                          { staticClass: "list-group-item" },
+                                          [
+                                            _c("input", {
+                                              directives: [
+                                                {
+                                                  name: "model",
+                                                  rawName: "v-model",
+                                                  value: _vm.checkedUsers,
+                                                  expression: "checkedUsers",
+                                                },
+                                              ],
+                                              staticClass:
+                                                "form-check-input me-1",
+                                              attrs: {
+                                                type: "checkbox",
+                                                disabled:
+                                                  user.id ===
+                                                  _vm.currentUser.id,
+                                              },
+                                              domProps: {
+                                                value: user.id,
+                                                checked: Array.isArray(
+                                                  _vm.checkedUsers
+                                                )
+                                                  ? _vm._i(
+                                                      _vm.checkedUsers,
+                                                      user.id
+                                                    ) > -1
+                                                  : _vm.checkedUsers,
+                                              },
+                                              on: {
+                                                change: function ($event) {
+                                                  var $$a = _vm.checkedUsers,
+                                                    $$el = $event.target,
+                                                    $$c = $$el.checked
+                                                      ? true
+                                                      : false
+                                                  if (Array.isArray($$a)) {
+                                                    var $$v = user.id,
+                                                      $$i = _vm._i($$a, $$v)
+                                                    if ($$el.checked) {
+                                                      $$i < 0 &&
+                                                        (_vm.checkedUsers =
+                                                          $$a.concat([$$v]))
+                                                    } else {
+                                                      $$i > -1 &&
+                                                        (_vm.checkedUsers = $$a
+                                                          .slice(0, $$i)
+                                                          .concat(
+                                                            $$a.slice($$i + 1)
+                                                          ))
+                                                    }
+                                                  } else {
+                                                    _vm.checkedUsers = $$c
+                                                  }
+                                                },
+                                              },
+                                            }),
+                                            _vm._v(
+                                              "\n                                        " +
+                                                _vm._s(
+                                                  user.last_name +
+                                                    " " +
+                                                    user.name
+                                                ) +
+                                                "\n                                    "
+                                            ),
+                                          ]
+                                        )
+                                      }),
+                                    ],
+                                    2
+                                  ),
                                   _vm._v(" "),
                                   _vm._m(0, true),
-                                  _vm._v(" "),
-                                  _vm._m(1, true),
-                                  _vm._v(" "),
-                                  _vm._m(2, true),
-                                  _vm._v(" "),
-                                  _vm._m(3, true),
-                                ],
-                                2
+                                ]
                               ),
                             ]),
                           ]
@@ -29551,6 +29802,11 @@ var render = function () {
                           {
                             staticClass: "btn btn-outline-dark",
                             attrs: { type: "button" },
+                            on: {
+                              click: function ($event) {
+                                return _vm.leaveChat(index)
+                              },
+                            },
                           },
                           [
                             _c(
@@ -29610,6 +29866,11 @@ var render = function () {
                           {
                             staticClass: "btn btn-outline-dark",
                             attrs: { type: "button" },
+                            on: {
+                              click: function ($event) {
+                                return _vm.deleteChat(index)
+                              },
+                            },
                           },
                           [
                             _c(
@@ -29652,6 +29913,79 @@ var render = function () {
             }),
             0
           ),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              staticClass: "position-absolute bottom-0 p-3",
+              staticStyle: { width: "16%" },
+            },
+            [
+              _c("hr"),
+              _vm._v(" "),
+              _c("div", { staticClass: "dropdown " }, [
+                _c(
+                  "a",
+                  {
+                    staticClass:
+                      "d-flex align-items-center text-black text-decoration-none dropdown-toggle",
+                    attrs: {
+                      href: "#",
+                      id: "dropdownUser1",
+                      "data-bs-toggle": "dropdown",
+                      "aria-expanded": "false",
+                    },
+                  },
+                  [
+                    _c("img", {
+                      staticClass: "rounded-circle me-2",
+                      attrs: {
+                        src: "https://github.com/mdo.png",
+                        alt: "",
+                        width: "32",
+                        height: "32",
+                      },
+                    }),
+                    _vm._v(" "),
+                    _c("strong", [
+                      _vm._v(
+                        _vm._s(
+                          _vm.currentUser.last_name + " " + _vm.currentUser.name
+                        )
+                      ),
+                    ]),
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "ul",
+                  {
+                    staticClass:
+                      "dropdown-menu dropdown-menu-dark text-small shadow",
+                    attrs: { "aria-labelledby": "dropdownUser1" },
+                  },
+                  [
+                    _c("li", [
+                      _c(
+                        "a",
+                        {
+                          staticClass: "dropdown-item",
+                          attrs: {
+                            href: "/users/" + _vm.currentUser.id + "/edit",
+                          },
+                        },
+                        [_vm._v("Edit")]
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _vm._m(1),
+                    _vm._v(" "),
+                    _vm._m(2),
+                  ]
+                ),
+              ]),
+            ]
+          ),
         ],
         1
       ),
@@ -29675,13 +30009,14 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "list-group-item" }, [
-      _c("input", {
-        staticClass: "form-check-input me-1",
-        attrs: { type: "checkbox", value: "", "aria-label": "..." },
-      }),
-      _vm._v(
-        "\n                                    Second checkbox\n                                "
+    return _c("div", { staticClass: "d-flex justify-content-end" }, [
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-outline-dark mt-4",
+          attrs: { type: "submit", "data-bs-dismiss": "offcanvas" },
+        },
+        [_vm._v("save\n                                    ")]
       ),
     ])
   },
@@ -29689,42 +30024,16 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "list-group-item" }, [
-      _c("input", {
-        staticClass: "form-check-input me-1",
-        attrs: { type: "checkbox", value: "", "aria-label": "..." },
-      }),
-      _vm._v(
-        "\n                                    Third checkbox\n                                "
-      ),
-    ])
+    return _c("li", [_c("hr", { staticClass: "dropdown-divider" })])
   },
   function () {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "list-group-item" }, [
-      _c("input", {
-        staticClass: "form-check-input me-1",
-        attrs: { type: "checkbox", value: "", "aria-label": "..." },
-      }),
-      _vm._v(
-        "\n                                    Fourth checkbox\n                                "
-      ),
-    ])
-  },
-  function () {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("li", { staticClass: "list-group-item" }, [
-      _c("input", {
-        staticClass: "form-check-input me-1",
-        attrs: { type: "checkbox", value: "", "aria-label": "..." },
-      }),
-      _vm._v(
-        "\n                                    Fifth checkbox\n                                "
-      ),
+    return _c("li", [
+      _c("a", { staticClass: "dropdown-item", attrs: { href: "/logout" } }, [
+        _vm._v("Sign out"),
+      ]),
     ])
   },
 ]
@@ -30306,59 +30615,61 @@ var render = function () {
       0
     ),
     _vm._v(" "),
-    _c(
-      "form",
-      {
-        on: {
-          submit: function ($event) {
-            $event.preventDefault()
-            return _vm.addMessage.apply(null, arguments)
-          },
-        },
-      },
-      [
-        _c(
-          "div",
+    _vm.activeChat.id
+      ? _c(
+          "form",
           {
-            staticClass: "input-group position-absolute bottom-0",
-            staticStyle: { width: "82%" },
+            on: {
+              submit: function ($event) {
+                $event.preventDefault()
+                return _vm.addMessage.apply(null, arguments)
+              },
+            },
           },
           [
-            _c("textarea", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.messageText,
-                  expression: "messageText",
-                },
-              ],
-              ref: "inputMessage",
-              staticClass: "form-control",
-              attrs: { placeholder: "write a message...", name: "text" },
-              domProps: { value: _vm.messageText },
-              on: {
-                input: function ($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.messageText = $event.target.value
-                },
-              },
-            }),
-            _vm._v(" "),
             _c(
-              "button",
+              "div",
               {
-                staticClass: "btn btn-outline-dark",
-                attrs: { type: "submit", id: "button-addon2" },
+                staticClass: "input-group position-absolute bottom-0",
+                staticStyle: { width: "82%" },
               },
-              [_vm._v("send")]
+              [
+                _c("textarea", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.messageText,
+                      expression: "messageText",
+                    },
+                  ],
+                  ref: "inputMessage",
+                  staticClass: "form-control",
+                  attrs: { placeholder: "write a message...", name: "text" },
+                  domProps: { value: _vm.messageText },
+                  on: {
+                    input: function ($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.messageText = $event.target.value
+                    },
+                  },
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-outline-dark",
+                    attrs: { type: "submit", id: "button-addon2" },
+                  },
+                  [_vm._v("send")]
+                ),
+              ]
             ),
           ]
-        ),
-      ]
-    ),
+        )
+      : _vm._e(),
   ])
 }
 var staticRenderFns = [

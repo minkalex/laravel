@@ -138,7 +138,7 @@ class UserController extends Controller
 
         if (Auth::attempt($credentials, $needUserRemember)) {
             $request->session()->regenerate();
-            return redirect()->route('main');
+            return redirect()->route('chats');
         }
 
         return back()->withErrors([
